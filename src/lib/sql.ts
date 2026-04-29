@@ -35,6 +35,44 @@ export function sqlNumber(value: unknown): string {
   return '0';
 }
 
+export function getSqlField(row: SqlRow | undefined, names: string[], fallback: unknown = undefined): unknown {
+  if (!row) return fallback;
+
+  for (const name of names) {
+    if (Object.prototype.hasOwnProperty.call(row, name)) return row[name];
+  }
+
+  const normalized = new Map<string, unknown>();
+  for (const [key, value] of Object.entries(row)) {
+    normalized.set(key.toLowerCase(), value);
+  }
+
+  for (const name of names) {
+    const value = normalized.get(name.toLowerCase());
+    if (value !== undefined) return value;
+  }
+
+  return fallback;
+}
+
+export function sqlNumberFromField(row: SqlRow | undefined, names: string[], fallback = 0): number {
+  const value = getSqlField(row, names, fallback);
+  const text = String(value ?? '').trim().replace(',', '.');
+  const parsed = Number(text);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+export function sqlTextFromField(row: SqlRow | undefined, names: string[], fallback = ''): string {
+  const value = getSqlField(row, names, fallback);
+  return String(value ?? fallback);
+}
+
+export function describeSqlRow(row: SqlRow | undefined): string {
+  if (!row) return 'sem linhas';
+  const keys = Object.keys(row);
+  return `colunas retornadas: ${keys.length ? keys.join(', ') : '(nenhuma)'}`;
+}
+
 export async function callSql(script: string): Promise<SqlRow[]> {
   const endpoint = process.env.RBA_SQL_ENDPOINT;
   if (!endpoint) {
