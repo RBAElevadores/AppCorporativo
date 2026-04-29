@@ -1,0 +1,75 @@
+:root {
+  --rba-blue: #0b3b75;
+  --rba-green: #15a35b;
+  --rba-bg: #f4f6f9;
+}
+
+html, body {
+  min-height: 100%;
+  background: var(--rba-bg);
+}
+
+body {
+  margin: 0;
+}
+
+.rba-shell {
+  min-height: 100vh;
+  background: var(--rba-bg);
+}
+
+.rba-sidebar {
+  width: 280px;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #07305f 0%, #0b3b75 100%);
+  color: #fff;
+  position: sticky;
+  top: 0;
+}
+
+.rba-sidebar a {
+  color: rgba(255,255,255,.86);
+  text-decoration: none;
+}
+
+.rba-sidebar a:hover,
+.rba-sidebar a.active {
+  background: rgba(255,255,255,.12);
+  color: #fff;
+}
+
+.rba-content {
+  min-width: 0;
+}
+
+.rba-card {
+  border: 0;
+  border-radius: 1rem;
+  box-shadow: 0 .5rem 1.5rem rgba(15, 23, 42, .08);
+}
+
+.rba-html-output img {
+  max-width: 100%;
+  height: auto;
+}
+
+.rba-html-output table {
+  width: 100%;
+}
+
+.rba-html-output .modal {
+  position: static !important;
+  display: block !important;
+  opacity: 1 !important;
+}
+
+@media (max-width: 991px) {
+  .rba-shell {
+    flex-direction: column;
+  }
+  .rba-sidebar {
+    width: 100%;
+    min-height: auto;
+    position: relative;
+  }
+}

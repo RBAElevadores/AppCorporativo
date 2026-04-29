@@ -1,0 +1,374 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
+<!-- Font Awesome JS -->
+<link rel="stylesheet" href="../wwwroot/styles/style.css">
+<!-- Our Custom CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.css">
+<!-- Gráficos do Google -->
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<!------ Include the above in your HEAD tag ---------->
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <link rel="sortcut icon" href="../wwwroot/ico.png" type="image/png"/>
+    <title> RBA - Técnico Online </title>
+
+	<style type="text/css">
+
+		@import "https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700";
+
+   		@-webkit-keyframes animate-div {
+                          from { opacity: 0; margin-top: -50px;}
+                          to { opacity: 1;margin-top: 0px;}
+                      }
+
+  	</style>
+
+	<script type="text/javascript">
+
+		google.charts.load('current', {'packages':['table']});
+
+
+		var arrayGrafico  = [["",""],[0,0]];
+		var tabela        = "";
+
+		var modalAberto   = "";
+		var abrir         = "";
+
+		var liberarInstalacao = "";
+
+		function modalAbrir(modal)
+		{
+			if (modalAberto.indexOf(modal) === -1)
+			{
+				modalAberto = modalAberto + "|" + modal;
+			}
+			}
+
+		function modalFechar(modal)
+		{
+			modalAberto = modalAberto.replace("|"+modal,"");	
+			
+			abrir = modalAberto.substring(0, modalAberto.indexOf("|"));
+			if (abrir === "")
+			{
+				abrir = modalAberto;
+			}
+			abrir = abrir.replace("|","");
+
+			if (abrir === "modalEquipamentos")
+			{
+				btnAbrirModalEquipamentos.click();
+			};
+
+			//Garantia
+			if (modalAberto === modal)
+				modalAberto = "";
+
+			if (modalAberto !== "")
+				setTimeout('$("body").addClass("modal-open");', 700);
+		}
+
+
+		function drawTable() 
+		{
+			var data = google.visualization.arrayToDataTable(arrayGrafico);
+
+			var options = {
+							width: '100em',
+							allowHtml: true
+							};
+
+			table = new google.visualization.Table(document.getElementById(tabela));
+			
+			document.getElementById('TableEquipamentos').style.display = "block";
+
+			table.draw(data, options);
+		}
+
+		function mensagem(titulo,html,tempoFechar,mostraBotaoFechar,mostraSpinner)
+		{
+			
+			document.getElementById('txtTituloMensagem').innerHTML = titulo;
+				
+			$("#corpoModalMensagem").html(html);
+
+			
+			if (tempoFechar > 0) 
+			{
+				setTimeout(' btnFechaModalMensagem.click(); ', tempoFechar);
+			}
+
+			if (mostraBotaoFechar === 1) 
+			{
+				document.getElementById('btnFechaModalMensagem').style.display = "block";
+			}
+			else
+			{	
+				document.getElementById('btnFechaModalMensagem').style.display = "none";
+			}
+
+			if (mostraSpinner === 1) 
+			{
+				document.getElementById('spinnerMensagem').style.display = "block";
+			}
+			else
+			{	
+				document.getElementById('spinnerMensagem').style.display = "none";
+			}
+
+			if (modalAberto.indexOf('modalMensagem') === -1)
+			{
+				btnModalMensagem.click();
+			} 
+
+		}
+
+		function pesquisar()
+		{
+			AddChangedControl('EDTPESQUISAR');
+
+			mensagem('PESQUISANDO...','Aguarde, procurando...',0,0,1);
+
+			BTNPESQUISAR.click();
+		}
+
+		function abrirPesquisa()
+		{
+			document.getElementById('TableEquipamentos').style.display = "none";
+
+			EDTPESQUISAR.value = "";
+			AddChangedControl('EDTPESQUISAR');
+
+			btnFechaModalEquipamentos.click();
+
+			btnAbrirModalEquipamentos.click();
+		}
+
+		function selecionar(obra)
+		{
+			document.getElementById('EDTOBRA').value = obra;
+			AddChangedControl('EDTOBRA'); //Serve para forçar alterar o valor, caso de evento async
+
+			btnFechaModalEquipamentos.click();
+
+			BTNCARREGAR.click();
+		}
+
+		function abrirEntregaTecnica(url)
+		{
+      		console.log("DOWNLOAD "+url);
+		}
+
+		function acessarEntregaTecnica(tipo)
+		{
+			document.getElementById('EDTACESSARENTREGATECNICA').value = tipo;
+			AddChangedControl('EDTACESSARENTREGATECNICA'); //Serve para forçar alterar o valor, caso de evento async
+
+			BTNACESSARENTREGATECNICA.click();
+		}
+
+	</script>
+</head>
+<body>
+
+	<nav class="navbar navbar-expand-lg navbar-light bg-light">
+	    <div class="row align-items-center w-100">
+	      <div class="col-2" align="left">
+	        <font class="ms-2" color="#14285a"> 
+	            <i class="fa-sharp fa-solid fa-circle-chevron-left fa-xl" style="cursor: pointer;" onclick="BTNVOLTAR.click();"></i> 
+	        </font>
+	      </div>
+	      <div class="col" align="center">
+	        <strong> <font color="#14285a"> Entrega Técnica </font> </strong>
+	      </div>
+	      <div class="col-2" align="right">
+	        <img src="../wwwroot/RBA.png" class="img-fluid" style="max-width: 50px; max-height: 50px;">
+	      </div>
+	    </div>
+	</nav>
+
+	<div class="container">
+
+		<br>
+		<br>
+
+		<div id="erroCadUsuario" style="-webkit-animation: animate-div 1s; display: none;">
+			<div class="row">
+				<div class="col">
+					<h3> 
+						<font color="red">
+							Seu cadastro de usuário está faltando vínculo com clientes! Avisar o financeiro para arrumar!
+						</font>
+					</h3>
+				</div>
+			</div>
+		</div>
+
+		<div id="corpo" style="-webkit-animation: animate-div 1s; display: none;">
+
+			<div class="row">
+				<div class="col" align="center">
+					<button type="button" class="btn btn-outline-dark" onclick="abrirPesquisa();"> 
+						<strong> PESQUISAR EQUIPAMENTO <i class="fas fa-search"></i> </strong> 
+					</button>
+				</div>
+			</div>
+			
+			<br>
+			<br>
+
+			<div id="dados" style="display: none;">
+				<!-- Preenchido automaticamente -->
+			</div>
+
+		</div>
+		
+	</div>
+
+
+
+	<!-- Modal Acessar Entrega Tecnica -->
+	<div class="modal fade" id="ModalAcessarEntregaTecnica" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="1" role="dialog" aria-labelledby="modal_AcessarEntregaTecnica" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+			<div class="modal-content border border-2 border-primary rounded">
+				<div class="modal-header" style="background: white;">
+					<div class="row w-100">
+						<div class="col" align="center">
+							<font color="#172e63"> <h5> Acessar a Entrega Técnica </h5> </font>
+						</div>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="btnFechaModalAcessarEntregaTecnica" onclick="modalFechar('modalMensagem');">
+						</button>
+					</div>
+				</div>
+				<div class="modal-body">
+					<br>
+					
+
+					<div class="container">
+						<div class="row" align="center">
+							<div class="col">
+								<button type="button" class="btn btn-outline-success btn-lg w-75" onclick="acessarEntregaTecnica(1);">RECEBER URL NO WHATSAPP</button>
+							</div>
+						</div>
+						<br>
+						<div class="row" align="center">
+							<div class="col">
+								<button type="button" class="btn btn-success btn-lg w-75" onclick="acessarEntregaTecnica(2);">ACESSAR ENTREGA TÉCNICA</button>
+							</div>
+						</div>
+					</div>
+					
+					<br>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- Modal Acessar Entrega Tecnica -->
+
+	<!-- Modal Equipamentos -->
+	<div class="modal fade" id="ModalEquipamentos" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="modal_Equipamentos" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+			<div class="modal-content border border-2 border-primary rounded">
+				<div class="modal-header" style="background: white;">
+					<div class="row w-100">
+						<div class="col" align="center">
+							<font color="#172e63"> <h5> Pesquisar Equipamentos </h5> </font>
+						</div>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="btnFechaModalEquipamentos" onclick="modalFechar('modalEquipamentos');">
+	            		</button>
+					</div>
+				</div>
+				<div class="modal-body">
+	          		
+	          		<div class="container border rounded shadow py-2">
+						<div class="row">
+							<div class="col">
+								<label for="EDTNOME" class="form-label"> Apelido, Obra, Ficha Técnica ou Cliente: </label>
+								<input type="text" id="EDTPESQUISAR" name="edtPesquisar" data-iw-component="edtPesquisar" class="form-control legacy-input" />
+							</div>
+						</div>
+
+						<br>
+
+						<div class="row">
+							<div class="col" align="center">
+								<button type="button" class="btn btn-primary" onclick="pesquisar();">PESQUISAR</button>
+							</div>
+						</div>
+					</div>
+
+					<br>
+					<br>
+
+					<div id="TableEquipamentos" style="display: none;"></div>
+	          
+	        	</div>
+	      	</div>
+	    </div>
+	</div>
+	<!-- Modal Equipamentos -->
+
+	<!-- Modal Mensagem -->
+	<div class="modal fade" id="ModalMensagem" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="1" role="dialog" aria-labelledby="modal_Mensagem" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+			<div class="modal-content border border-2 border-primary rounded">
+				<div class="modal-header" style="background: white;">
+					<div class="row w-100">
+						<div class="col" align="center">
+							<font color="#172e63"> <h5> <text id="txtTituloMensagem"></text> </h5> </font>
+						</div>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="btnFechaModalMensagem" onclick="modalFechar('modalMensagem');">
+						</button>
+					</div>
+				</div>
+				<div class="modal-body">
+					<br>
+					
+					<div id="corpoModalMensagem">
+						<!-- Preenchido automaticamente -->
+					</div>
+
+					<br>
+
+					<div class="spinner-border text-primary" role="status" id="spinnerMensagem">
+					  <span class="visually-hidden">...</span>
+					</div>
+					
+					<br>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- Modal Mensagem -->
+
+	<!-- Apenas estanciando os componentes que tem function para o javascript conseguir chamá-los ||| Estão invisíveis -->
+	<div class="row" style="display:none">
+		<div class="col">
+			<button type="button" id="BTNVOLTAR" name="btnVoltar" data-iw-component="btnVoltar" class="btn btn-outline-dark legacy-btn">Voltar</button>
+			<button type="button" id="BTNPESQUISAR" name="btnPesquisar" data-iw-component="btnPesquisar" class="btn btn-outline-dark legacy-btn">Pesquisar</button>
+			<input type="text" id="EDTOBRA" name="edtObra" data-iw-component="edtObra" class="form-control legacy-input" />
+			<button type="button" id="BTNCARREGAR" name="btnCarregar" data-iw-component="btnCarregar" class="btn btn-outline-dark legacy-btn">Carregar</button>
+			<button type="button" id="BTNACESSARENTREGATECNICA" name="btnAcessarEntregaTecnica" data-iw-component="btnAcessarEntregaTecnica" class="btn btn-outline-dark legacy-btn">Acessar Entrega Tecnica</button>
+			<input type="text" id="EDTACESSARENTREGATECNICA" name="edtAcessarEntregaTecnica" data-iw-component="edtAcessarEntregaTecnica" class="form-control legacy-input" />
+			<button type="button" id="BTNESTRUTURAENTREGATECNICA" name="btnEstruturaEntregaTecnica" data-iw-component="btnEstruturaEntregaTecnica" class="btn btn-outline-dark legacy-btn">Estrutura Entrega Tecnica</button>
+
+			<button type="button" data-bs-toggle="modal" data-bs-target="#ModalAcessarEntregaTecnica" id="btnModalAcessarEntregaTecnica" onclick="modalAbrir('modalAcessarEntregaTecnica');"> </button>
+			<button type="button" data-bs-toggle="modal" data-bs-target="#ModalMensagem" id="btnModalMensagem" onclick="modalAbrir('modalMensagem');"> </button>
+			<button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#ModalEquipamentos" onclick="modalAbrir('modalEquipamentos')" id="btnAbrirModalEquipamentos"> </button>
+		</div>
+	</div>
+
+<script>window.RBA_MODULE = 'entrega-tecnica';</script>
+<script src="/legacy-bridge.js"></script>
+<div id="ResultadoMigracao" class="container-fluid my-3"></div>
+</body>
+</html>

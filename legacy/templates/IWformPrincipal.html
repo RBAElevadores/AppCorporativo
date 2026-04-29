@@ -1,0 +1,157 @@
+<!-- Bootstrap CSS CDN -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
+<!-- Our Custom CSS -->
+<link rel="stylesheet" href="../wwwroot/styles/style.css">
+<!-- Font Awesome JS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.css">
+<!-- Font Awesome JS ANIMATIONS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome-animation/0.3.0/font-awesome-animation.css">
+<!-- jQuery CDN - Slim version (=without AJAX) -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<!-- Popper.JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ" crossorigin="anonymous"></script>
+<!-- Bootstrap JS -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>
+
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <link rel="sortcut icon" href="../wwwroot/ico.png" type="image/png"/>
+    <title> RBA - Técnico Online </title>
+
+    <script type="text/javascript">
+
+      $(document).ready(function () {
+                                     
+                                        // $('#sidebar').toggleClass('active');
+
+                                        $('#sidebarCollapse').on('click', function () {
+                                            $('#sidebar').toggleClass('active');
+                                        });
+
+                                    });
+
+      function carregaHtmls(nome,html)
+      {
+        $("#"+nome).html(html);    
+      }
+
+      function atender(codigo,direto)
+      {
+        document.getElementById('EDTATENDIMENTO').value = codigo;
+        AddChangedControl('EDTATENDIMENTO'); //Serve para forçar alterar o valor, caso de evento async
+
+        if (direto === 1)
+        {
+          BTNATENDER.click();
+        }
+        else
+        {
+          btnModalAtender.click();
+        }
+      }
+
+      function EscondeSideBar()
+      {
+        $('#sidebar').toggleClass('active');
+      }
+
+    </script>
+</head>
+
+<body>
+
+  <div class="wrapper">
+    <!-- Sidebar  -->
+    <nav id="sidebar">
+      <div class="sidebar-header" align="center">
+        <img src="../wwwroot/Logo3.png" class="img-fluid rounded">
+      </div>
+
+      <ul class="list-unstyled components mx-1">
+        <li class="my-1">
+                  
+          <ul class="collapse list-unstyled show">
+            <div id="conversasabertas">
+              <!-- Preenchido automaticamente -->
+            </div>
+          </ul>
+
+        </li>
+      </ul>
+
+    </nav>
+
+    <!-- Page Content  -->
+    <div id="content">
+
+      <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="row align-items-center w-100">
+          <div class="col" align="left">
+            <font color="#14285a"> 
+                <i class="fa-sharp fa-solid fa-circle-chevron-left fa-xl" style="cursor: pointer;" onclick="BTNVOLTAR.click();"></i> 
+            </font>
+            
+            <button class="btn btn-outline-dark" onclick="EscondeSideBar();" style="display: none;">
+              <i class="fas fa-bars"></i>
+            </button>
+          </div>
+          <div class="col">
+            <font color="#14285a"> TICKET / S.O.S </font>
+          </div>
+        </div>
+      </nav>
+
+      <br>
+
+      <div class="row">
+        <div class="col-md-2">
+          <b> PENDÊNCIAS </b>
+        </div>
+      </div>
+
+      <hr>
+      <br>
+
+      <div class="container" id="atendimentos">
+        <!-- Preenchido automaticamente -->
+      </div>
+            
+    </div>
+  </div>
+
+  <!-- Modal Atender -->
+  <div class="modal fade" id="ModalAtender" tabindex="-1" role="dialog" aria-labelledby="modal_Atender" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header" style="background: #14285a;">
+        </div>
+        <div class="modal-body">
+          <br>
+          <p> Tem certeza que deseja começar o atendimento?</p>
+        </div>
+        <div class="modal-footer" style="background: #14285a;">
+          {%btnAtender%}
+          <button type="button" class="btn btn-light btn-sm w-25" data-dismiss="modal"> CANCELAR </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Modal Atender -->
+
+  <!-- Apenas estanciando os componentes que tem function para o javascript conseguir chamá-los ||| Estão invisíveis -->
+  <div class="row" style="display:none">
+    <div class="col">
+      {%edtAtendimento%}
+      {%btnVoltar%}
+      <button type="button" data-toggle="modal" data-target="#ModalAtender" id="btnModalAtender"></button> 
+    </div>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,239 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
+<!-- Font Awesome JS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.css">
+<!------ Include the above in your HEAD tag ---------->
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <link rel="sortcut icon" href="../wwwroot/ico.png" type="image/png"/>
+    <title> RBA - Técnico Online </title>
+
+    <style type="text/css">
+
+    	@import "https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700";
+
+   		@-webkit-keyframes animate-div {
+                          from { opacity: 0; margin-top: -50px;}
+                          to { opacity: 1;margin-top: 0px;}
+                      }
+    </style>
+
+    <script type="text/javascript">
+
+    	var LogoEscura = 0;
+    	var LogoClara = 0;
+    	var EmpresaSistema = 0;
+
+
+        function carregarLogo(tipo) 
+        {
+		    const file = event.target.files[0]; // Obtém o primeiro arquivo selecionado
+		    if (tipo === 1)
+		    {
+		    	var imagem = document.getElementById('logoFundoEscuro');	
+		    	var nomeImagem = 'LogoParceiro_FundoEscuro_'+EmpresaSistema+'.png';
+		    }
+		    else
+		    {
+		    	var imagem = document.getElementById('logoFundoClaro');	
+		    	var nomeImagem = 'LogoParceiro_FundoClaro_'+EmpresaSistema+'.png';
+		    };	
+		    
+
+		    if (file && file.type === 'image/png') 
+		    {
+		        // Exibe a imagem no elemento img
+		        const reader = new FileReader();
+		        
+		        reader.onload = function(e) 
+		        	{
+		            	imagem.src = e.target.result;
+		            	const base64Image = e.target.result.split(',')[1]; // Remove o prefixo 'data:image/png;base64,'
+
+		            	// Cria um novo objeto XMLHttpRequest
+				        let request = new XMLHttpRequest();
+
+				        // Define o tipo de solicitação e a URL
+				        request.open('POST', 'https://rbaelevadores.ddns.net:8112/imagensgeral', true);
+
+				        // Função de retorno de chamada chamada quando a resposta é recebida
+				        request.onload = function() 
+				        {
+				            if (request.status >= 200 && request.status < 400) 
+				            {
+				                const data = JSON.parse(request.responseText);
+				                console.log('Sucesso:', data);
+				            } else 
+				            {
+				                console.error('Erro ao fazer a requisição:', request.status);
+				                refreshImage();
+				            }
+				        };
+
+				        // Função de retorno de chamada chamada em caso de erro de rede
+				        request.onerror = function() 
+				        {
+				            console.error('Erro de conexão com a API');
+				            refreshImage();
+				        };
+
+				        const jsonData = JSON.stringify({
+											                foto: base64Image,
+											                tipo: 'png',    
+											                nome: nomeImagem
+											            });
+
+				        request.send(jsonData);
+
+		        	};
+		        
+		        reader.readAsDataURL(file); // Lê o conteúdo do arquivo como uma URL de dados
+		    }
+		}
+
+    	function refreshImage() 
+    	{
+			var imgEscuro = document.getElementById('logoFundoEscuro');
+			var imgClaro  = document.getElementById('logoFundoClaro');
+			var timestamp = new Date().getTime(); // Obtém o timestamp atual
+			
+			if( LogoEscura === 1)
+			{
+				imgEscuro.src = 'LogoParceiro_FundoEscuro_'+EmpresaSistema+'.png?t=' + timestamp;
+			}
+			else
+			{
+				imgEscuro.src = 'BloqueadoBranco.png?t=' + timestamp;	
+			}
+
+			if( LogoClara === 1)
+			{
+				imgClaro.src = 'LogoParceiro_FundoClaro_'+EmpresaSistema+'.png?t=' + timestamp;
+			}
+			else
+			{
+				imgClaro.src = 'BloqueadoPreto.png?t=' + timestamp;
+			}
+		}
+
+		// Chama a função de consultar a API quando a página carrega
+	    window.onload = setTimeout("refreshImage();", 200);
+
+    </script>
+
+</head>
+<body>
+	
+	<nav class="navbar navbar-expand-lg navbar-light bg-light">
+	    <div class="row align-items-center w-100">
+	      <div class="col-2" align="left">
+	        <font class="ms-2" color="#14285a"> 
+	            <i class="fa-sharp fa-solid fa-circle-chevron-left fa-xl" style="cursor: pointer;" onclick="BTNVOLTAR.click();"></i> 
+	        </font>
+	      </div>
+	      <div class="col" align="center">
+	        <strong> <font color="#14285a"> Informações da Empresa </font> </strong>
+	      </div>
+	      <div class="col-2" align="right">
+	        <img src="../wwwroot/RBA.png" class="img-fluid" style="max-width: 50px; max-height: 50px;">
+	      </div>
+	    </div>
+	</nav>
+
+	<div class="container">
+
+		<br>
+
+		<div class="row mt-2">
+			<div class="col" align="center">
+				<font size=3 color="#14285a"> <strong> Logo para Fundo Escuro </strong> </font>  
+			</div>
+		</div>
+
+		<div class="row mb-4 mt-2 py-1 mx-2 align-items-center" style="border: 2px solid #14285a; border-radius: 20px; background: #212121;">
+			<div class="col">
+
+				<!-- Logo Fundo Escuro -->
+				<div class="row my-1">
+					<div class="col my-2">
+						<div class="row">
+							<div class="col" align="center">
+								<img height="100" width="100" class="rounded" id="logoFundoEscuro" onclick="inputLogoFundoEscuro.click();">
+							</div>
+							</div>
+							<div class="col" align="right">
+								<div class="row align-items-center">
+									<div class="col">
+										<button type="button" class="btn btn-light my-1 w-100" onclick="inputLogoFundoEscuro.click();">SELECIONAR</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- Logo Fundo Escuro -->
+
+			</div>
+		</div>
+
+		<hr>
+
+		<div class="row mt-2">
+			<div class="col" align="center">
+				<font size=3 color="#14285a"> <strong> Logo para Fundo Claro </strong> </font>  
+			</div>
+		</div>
+
+		<div class="row mb-4 mt-2 py-1 mx-2 align-items-center" style="border: 2px solid #14285a; border-radius: 20px;">
+			<div class="col">
+
+				<!-- Logo Fundo Claro -->
+				<div class="row my-1">
+					<div class="col my-2">
+						<div class="row">
+							<div class="col" align="center">
+								<img height="100" width="100" class="rounded" id="logoFundoClaro" onclick="inputLogoFundoClaro.click();">
+							</div>
+							</div>
+							<div class="col" align="right">
+								<div class="row align-items-center">
+									<div class="col">
+										<button type="button" class="btn btn-dark my-1 w-100" onclick="inputLogoFundoClaro.click();">SELECIONAR</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- Logo Fundo Claro -->
+
+			</div>
+		</div>
+
+	</div>
+
+
+	<!-- Apenas estanciando os componentes que tem function para o javascript conseguir chamá-los ||| Estão invisíveis -->
+  	<div class="row" style="display:none">
+    	<div class="col">
+    		<button type="button" id="BTNVOLTAR" name="btnVoltar" data-iw-component="btnVoltar" class="btn btn-outline-dark legacy-btn">Voltar</button>
+
+    		<input type="file" id="inputLogoFundoEscuro" onchange="carregarLogo(1);" style="display: none;" accept="image/png">
+    		<input type="file" id="inputLogoFundoClaro" onchange="carregarLogo(2);" style="display: none;" accept="image/png">
+    	</div>
+    </div>
+
+
+<script>window.RBA_MODULE = 'informacoes-empresa';</script>
+<script src="/legacy-bridge.js"></script>
+<div id="ResultadoMigracao" class="container-fluid my-3"></div>
+</body>
+</html>

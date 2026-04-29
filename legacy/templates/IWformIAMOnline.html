@@ -1,0 +1,877 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
+<!-- Font Awesome JS -->
+<link rel="stylesheet" href="../wwwroot/styles/style.css">
+<!-- Our Custom CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.css">
+<!-- Gráficos do Google -->
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<!------ Include the above in your HEAD tag ---------->
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <link rel="sortcut icon" href="../wwwroot/ico.png" type="image/png"/>
+    <title> RBA - Técnico Online </title>
+
+    <style type="text/css">
+		@import "https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700";
+
+   		@-webkit-keyframes animate-div {
+                          from { opacity: 0; margin-top: -50px;}
+                          to { opacity: 1;margin-top: 0px;}
+                      }
+
+        .botao-redondo {
+            width: 50px; /* Largura do botão */
+            height: 50px; /* Altura do botão (tornando-o redondo) */
+            background-color: black; /* Cor de fundo do botão */
+            border: none; /* Remove a borda do botão */
+            border-radius: 50%; /* Define o raio para torná-lo redondo */
+            color: white; /* Cor do texto */
+            font-size: 16px; /* Tamanho da fonte do texto */
+            text-align: center; /* Centraliza o texto horizontalmente e verticalmente */
+            line-height: 50px; /* Alinha o texto verticalmente no centro */
+            cursor: pointer; /* Transforma o cursor em uma mão quando pairado */
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5); /* Sombra do botão */
+        }
+
+        header {
+		    position: fixed;
+		    top: 0; /* Fixar o cabeçalho no topo da janela */
+		    left: 0;
+		    width: 100%; /* Ocupar toda a largura da janela */
+		    background-color: #ec1c24; /* Cor de fundo do cabeçalho */
+		    padding: 10px; /* Espaçamento interno no cabeçalho */
+		    z-index: 1000; /* Defina um valor alto para z-index para garantir que o cabeçalho fique acima de outros elementos */
+		}
+
+  	</style>
+
+  	<script type="text/javascript">
+
+  		google.charts.load('current', {'packages':['table']});
+
+
+    	var arrayGrafico  = [["",""],[0,0]];
+    	var tabela        = "";
+
+    	var modalAberto   = "";
+    	var abrir         = "";
+
+    	var liberarInstalacao = "";
+
+    	function modalAbrir(modal)
+	    {
+	    	if (modalAberto.indexOf(modal) === -1)
+	    	{
+	    		modalAberto = modalAberto + "|" + modal;
+	    	}
+	  	}
+
+	    function modalFechar(modal)
+		{
+			modalAberto = modalAberto.replace("|"+modal,"");	
+			
+			abrir = modalAberto.substring(0, modalAberto.indexOf("|"));
+			if (abrir === "")
+			{
+				abrir = modalAberto;
+			}
+			abrir = abrir.replace("|","");
+
+			if (abrir === "modalEquipamentos")
+			{
+				btnAbrirModalEquipamentos.click();
+			};
+
+			//Garantia
+			if (modalAberto === modal)
+				modalAberto = "";
+
+			if (modalAberto !== "")
+				setTimeout('$("body").addClass("modal-open");', 700);
+		}
+
+
+    	function carregaHtmls(nome,html)
+      	{
+        	$("#"+nome).html(html);    
+      	}
+
+      	function drawTable() 
+    	{
+			var data = google.visualization.arrayToDataTable(arrayGrafico);
+
+			var options = {
+							width: '100em',
+							allowHtml: true
+							};
+
+			table = new google.visualization.Table(document.getElementById(tabela));
+			 
+			document.getElementById('TableEquipamentos').style.display = "block";
+
+			table.draw(data, options);
+		}
+
+		function mensagem(titulo,html,tempoFechar,mostraBotaoFechar,mostraSpinner)
+	    {
+	    	
+	    	document.getElementById('txtTituloMensagem').innerHTML = titulo;
+	    		
+	    	$("#corpoModalMensagem").html(html);
+
+	    	
+	    	if (tempoFechar > 0) 
+	    	{
+	    		setTimeout(' btnFechaModalMensagem.click(); ', tempoFechar);
+	    	}
+
+	    	if (mostraBotaoFechar === 1) 
+	    	{
+	    		document.getElementById('btnFechaModalMensagem').style.display = "block";
+	    	}
+	    	else
+	    	{	
+	    		document.getElementById('btnFechaModalMensagem').style.display = "none";
+	    	}
+
+	    	if (mostraSpinner === 1) 
+	    	{
+	    		document.getElementById('spinnerMensagem').style.display = "block";
+	    	}
+	    	else
+	    	{	
+	    		document.getElementById('spinnerMensagem').style.display = "none";
+	    	}
+
+	    	if (modalAberto.indexOf('modalMensagem') === -1)
+	    	{
+	    		btnModalMensagem.click();
+	    	} 
+
+	    }
+
+	    function pesquisar()
+	    {
+        	AddChangedControl('EDTPESQUISAR');
+
+        	mensagem('PESQUISANDO...','Aguarde, procurando...',0,0,1);
+
+        	BTNPESQUISAR.click();
+	    }
+
+	    function abrirPesquisa()
+	    {
+			document.getElementById('TableEquipamentos').style.display = "none";
+
+			EDTPESQUISAR.value = "";
+			AddChangedControl('EDTPESQUISAR');
+
+			btnFechaModalEquipamentos.click();
+
+    		btnAbrirModalEquipamentos.click();
+	    }
+
+	    function selecionar(obra)
+	    {
+	    	document.getElementById('EDTOBRA').value = obra;
+	        AddChangedControl('EDTOBRA'); //Serve para forçar alterar o valor, caso de evento async
+
+			btnFechaModalEquipamentos.click();
+
+	        BTNCARREGAR.click();
+	    }
+
+	    function selecionarComando(comando)
+	    {
+	    	document.getElementById('EDTACAO').value = comando;
+	        AddChangedControl('EDTACAO'); //Serve para forçar alterar o valor, caso de evento async
+
+			btnFechaModalComandos.click();
+	    }
+
+	    function valores(tipo)
+	    {
+	    	document.getElementById('EDTVALORES').value = tipo;
+	        AddChangedControl('EDTVALORES'); //Serve para forçar alterar o valor, caso de evento async
+
+			BTNVALORES.click();
+	    }
+
+
+	    function abrirBotoeira()
+	    {
+	    	if (document.getElementById("botoeira").style.display === "block")
+			{
+				document.getElementById("botoeira").style.display = "none";
+			}
+			else
+			{
+				document.getElementById("botoeira").style.display = "block";
+			}
+	    }
+
+	    function alterarValores(comando)
+	    {
+	    	document.getElementById('EDTACAO').value = comando;
+	        AddChangedControl('EDTACAO'); //Serve para forçar alterar o valor, caso de evento async
+
+	        btnFechaModalValores.click();
+
+	        setTimeout(' window.location.href="#linhaComando"; ', 300);
+	    }
+
+	    function acionarBotao(indice)
+	    {
+	    	document.getElementById('EDTACIONARBOTAO').value = indice;
+	        AddChangedControl('EDTACIONARBOTAO'); //Serve para forçar alterar o valor, caso de evento async
+
+	        BTNACIONARBOTAO.click();
+	    }
+
+	    function abrirListaComandos(tipo,semEscolha)
+	    {
+	        document.getElementById('EDTLISTACOMANDO').value = tipo;
+	        AddChangedControl('EDTLISTACOMANDO'); //Serve para forçar alterar o valor, caso de evento async
+
+	        document.getElementById('EDTLISTACOMANDOSEMESCOLHA').value = semEscolha;
+	        AddChangedControl('EDTLISTACOMANDOSEMESCOLHA'); //Serve para forçar alterar o valor, caso de evento async
+
+	        BTNLISTACOMANDO.click();	
+	    }
+
+	    function atualizarListaComandos()
+	    {
+	        AddChangedControl('EDTLISTARCOMANDOSFILTRAR'); //Serve para forçar alterar o valor, caso de evento async	    	
+
+	        BTNATUALIZARLISTACOMANDOS.click();
+	    }
+
+	    function limparFiltroListaComandos()
+	    {
+	    	document.getElementById('EDTLISTARCOMANDOSFILTRAR').value = "";
+	        AddChangedControl('EDTLISTARCOMANDOSFILTRAR'); //Serve para forçar alterar o valor, caso de evento async
+	    }
+
+	    function historicos(tipo)
+	    {
+	    	document.getElementById('EDTHISTORICOS').value = tipo;
+	        AddChangedControl('EDTHISTORICOS'); //Serve para forçar alterar o valor, caso de evento async
+
+	        document.getElementById("tableHistoricos").style.display = "none";
+			document.getElementById("corpoHistoricos").style.display = "block";
+	        document.getElementById("corpoHistoricos").innerHTML = "Carregando...";	
+	        
+	        
+	        btnModalHistoricos.click();
+
+	        BTNHISTORICOS.click();
+	    }
+
+	    function mostrarSOS()
+	    {
+	    	document.getElementById("espacoSOS").style.display = "block";
+	    	document.getElementById("headerSOS").style.display = "block";
+	    }
+
+		function addChat(quem,texto,hora)
+		{
+			var html     = '';
+			var alinhar  = '';
+
+			if (quem === "RBA ELEVADORES")
+			{
+				alinhar  = "right";
+				quem     = "RBA:";
+			}
+			else
+			{
+				alinhar  = "left";
+				quem     = "Cliente:"
+			}
+
+
+			html = $('<div class="row"> <div class="col" align="'+alinhar+'"> <strong> '+quem+' </strong> '+texto+'        - '+hora+' </div> </div> ');
+
+			$('#mensagensSOS').append(html);
+
+			//Joga o scroll do div da conversa pra baixo
+			document.getElementById('mensagensSOS').scrollTop = document.getElementById('mensagensSOS').scrollHeight;
+		}
+
+		function liberarEquipInstalacao(aux)
+		{
+			document.getElementById('EDTLIBERAREQUIP').value = aux;
+	        AddChangedControl('EDTLIBERAREQUIP');
+
+			if (liberarInstalacao === "1") 
+			{
+				BTNEMINSTALACAOSENHA.click();
+			}
+			else if (liberarInstalacao === "2") 
+			{
+				BTNEMINSTALACAOAUTORIZAR.click();
+			}
+
+		}
+
+  	</script>
+
+</head>
+<body>
+
+	<header class="shadow" style="height: 20%; display: none;" id="headerSOS">
+		<div class="container-fluid" style="height: 70%">
+			<font size="2">
+				<div class="container h-100 rounded" id="mensagensSOS" style="background: white; overflow-y: auto;">
+					<!-- Preenchido automaticamente -->	
+				</div>
+			</font>
+		</div>
+		<div class="row mt-2 align-items-center mb-2">
+			<div class="col" align="left">
+				<button type="button" class="btn btn-light btn-sm" id="BTNSOS"> VOLTAR SOS </button>
+			</div>
+			<div class="col" align="center">
+				<strong> <font color="white"> SOS </font> </strong> 
+			</div>
+			<div class="col" align="right">
+				<button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalMensagemSOS"> MENSAGEM </button>
+			</div>
+		</div>
+	</header>
+
+	<div id="espacoSOS" style="height:20%; display: none;">
+	</div>
+
+	<nav class="navbar navbar-expand-lg navbar-light bg-light">
+	    <div class="row align-items-center w-100">
+	      <div class="col-2" align="left">
+	        <font class="ms-2" color="#14285a"> 
+	            <i class="fa-sharp fa-solid fa-circle-chevron-left fa-xl" style="cursor: pointer;" onclick="BTNVOLTAR.click();"></i> 
+	        </font>
+	      </div>
+	      <div class="col" align="center">
+	        <strong> <font color="#14285a"> I AM Online </font> </strong>
+	      </div>
+	      <div class="col-2" align="right">
+	        <img src="../wwwroot/RBA.png" class="img-fluid" style="max-width: 50px; max-height: 50px;">
+	      </div>
+	    </div>
+	</nav>
+
+	<div class="container">
+
+		<strong> Lista de Comandos: </strong>
+		<div class="container border border-dark rounded shadow py-1">
+			<div class="row py-2">
+				<div class="col mx-1 my-1">
+					<button type="button" class="btn btn-info btn-sm shadow w-100 h-100" onclick="abrirListaComandos(1,0);"> PinOuts </button>
+				</div>
+				<div class="col mx-1 my-1">
+					<button type="button" class="btn btn-info btn-sm shadow w-100 h-100" onclick="abrirListaComandos(2,0);"> $000 Serial </button>
+				</div>
+				<div class="col mx-1 my-1">
+					<button type="button" class="btn btn-info btn-sm shadow w-100 h-100" onclick="abrirListaComandos(3,0);"> EPROM </button>
+				</div>
+			</div>
+		</div>
+
+		<br>
+		<br>
+
+		<div class="row">
+			<div class="col" align="center">
+				<button type="button" class="btn btn-outline-dark" onclick="abrirPesquisa();"> 
+					<strong> PESQUISAR EQUIPAMENTO <i class="fas fa-search"></i> </strong> 
+				</button>
+			</div>
+		</div>
+		
+		<br>
+		<br>
+
+		<div id="dados" style="display: none;">
+
+			<strong> Informações: </strong>
+			<div class="container border border-dark rounded shadow py-2">
+				<font size="2">
+					<div id="cabecalho">
+						<!-- Carregado automaticamente -->
+					</div>
+				</font>
+			</div>
+
+			<div id="equipamentoOffline" style="display: none;">
+				<!-- Preenchido automaticamente -->
+			</div>
+
+			<br>
+
+			<div id="equipamentoEmInstalacao" style="display: none;">
+				<div class="container rounded border border-3 border-warning shadow py-2">
+					<div class="row my-2">
+						<div class="col" align="center">
+							<strong> <font color="red"> Liberar "Em Instalação" </font> </strong>
+						</div>
+					</div>
+					<div class="row my-2" id="equipamentoEmInstalacaoAutorizar">
+						<div class="col mb-2">
+							<button type="button" class="btn btn-outline-dark w-100"  onclick="liberarInstalacao = '1'; btnModalLiberarEquipamento.click();">Visualizar Senha</button>
+						</div>
+						<div class="col">
+							<button type="button" class="btn btn-primary w-100" onclick="BTNEMINSTALACAOAUTORIZAR.click();">Enviar Autorização</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<br>
+
+			<div class="container border border-success rounded shadow py-2">
+				<font size="2">
+					<div class="row">
+						<div class="col my-1 mx-1">
+							<button type="button" class="btn btn-outline-dark w-100 h-100" onclick="valores(0);"> BLOCO </button>
+						</div>
+						<div class="col my-1 mx-1">
+							<button type="button" class="btn btn-outline-dark w-100 h-100" onclick="valores(1);"> PINOUTS </button>
+						</div>
+						<div class="col my-1 mx-1">
+							<button type="button" class="btn btn-outline-dark w-100 h-100" onclick="valores(2);"> PARÂMETROS </button>
+						</div>
+						<div class="col my-1 mx-1">
+							<button type="button" class="btn btn-outline-dark w-100 h-100" onclick="valores(3);"> VARIÁVEIS 1 </button>
+						</div>
+						<div class="col my-1 mx-1">
+							<button type="button" class="btn btn-outline-dark w-100 h-100" onclick="valores(4);"> VARIÁVEIS 2 </button>
+						</div>
+						<div class="col my-1 mx-1">
+							<button type="button" class="btn btn-outline-dark w-100 h-100" onclick="valores(5);"> VARIÁVEIS 3 </button>
+						</div>
+						<div class="col my-1 mx-1">
+							<button type="button" class="btn btn-outline-dark w-100 h-100" onclick="valores(6);"> VARIÁVEIS 4 </button>
+						</div>
+						<div class="col my-1 mx-1">
+							<button type="button" class="btn btn-outline-dark w-100 h-100" onclick="valores(7);"> SUPORTE ONLINE </button>
+						</div>
+					</div>
+				</font>
+			</div>
+
+			<br>
+
+			<strong> Botoeira: </strong>
+			<div class="container border border-dark rounded shadow py-2 mt-2">
+				<font size="2">
+					<div class="mx-1" id="botoeira">
+						<!-- Carregado automaticamente -->
+					</div>
+				</font>
+			</div>
+
+			<br>
+
+			<strong> Botões Acionar: </strong>
+			<div id="botoes">
+				<!-- Preenchido automaticamente -->
+			</div>
+
+			<hr>
+
+			<strong> Enviar Comando: </strong>
+			<div class="container border border-dark rounded shadow py-1 mt-2" id="linhaComando">
+				<font size="2">
+					<div class="row my-1">
+						<div class="col">
+							{%edtAcao%}
+						</div>
+					</div>
+					<div class="row my-2">
+						<div class="col" align="left">
+							{%chkEPROM%}
+							<label class="form-check-label" for="CHKEPROM">
+							Abrir EPROM
+							</label>
+						</div>
+						<div class="col" align="center">
+							<button type="button" class="btn btn-success w-50" id="BTNACAO"> ENVIAR </button>
+						</div>
+					</div>
+				</font>
+
+				<strong> Comandos: </strong>
+				<div class="row">
+					<div class="col mx-1 my-1">
+						<button type="button" class="btn btn-info btn-sm shadow w-100 h-100" onclick="abrirListaComandos(1,1);"> PinOuts </button>
+					</div>
+					<div class="col mx-1 my-1">
+						<button type="button" class="btn btn-info btn-sm shadow w-100 h-100" onclick="abrirListaComandos(2,1);"> $000 Serial </button>
+					</div>
+					<div class="col mx-1 my-1">
+						<button type="button" class="btn btn-info btn-sm shadow w-100 h-100" onclick="abrirListaComandos(3,1);"> EPROM </button>
+					</div>
+				</div>
+			</div>
+
+			<hr>
+
+			<strong> Manual Cabineiro: </strong>
+			<div class="container border border-dark rounded shadow">
+				<div class="row mt-2">
+					<div class="col" align="center">
+						{%btnManualCabineiroAtivar%}
+					</div>
+					<div class="col" align="center">
+						{%btnManualCabineiroDesativar%}
+					</div>
+				</div>
+				<div class="row mt-2">
+					<div class="col" align="center">
+						{%btnManualCabineiroSubir%}
+					</div>
+					<div class="col" align="center">
+						{%btnManualCabineiroDescer%}
+					</div>
+				</div>
+
+				<hr>
+
+				<div class="row">
+					<div class="col" align="center">
+						{%btnPinOut%}
+					</div>
+				</div>
+				<div class="row my-2">
+					<div class="col" align="left">
+						<nobr> {%lblPinOut%} </nobr>
+					</div>
+				</div>
+			</div>
+
+			<br>
+
+			<strong> Acões Pendentes: </strong>
+			<div class="container border border-dark rounded shadow py-4 mt-2">
+				<font size="2">
+					<div id="TableAcoesPendentes"></div>
+				</font>
+			</div>
+
+		</div>
+	</div>
+
+
+
+	<!-- Modal Mensagem SOS -->
+	<div class="modal fade" id="ModalMensagemSOS" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="modal_MensagemSOS" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+			<div class="modal-content border border-2 border-primary rounded">
+				<div class="modal-header" style="background: white;">
+					<div class="row w-100">
+						<div class="col" align="center">
+							<font color="#172e63"> <h5> Enviar Mensagem SOS </h5> </font>
+						</div>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="btnFechaModalMensagemSOS" onclick="modalFechar('modalMensagemSOS');">
+	            		</button>
+					</div>
+				</div>
+				<div class="modal-body">
+	          		<div class="row mt-2">
+	          			<div class="col" align="left">
+	          				{%edtMensagemSOS%}
+	          			</div>
+	          		</div>	        
+
+	          		<br>
+
+	          		<div class="row mb-2">
+	          			<div class="col" align="center">
+	          				{%btnMensagemSOS%}
+	          			</div>
+	          		</div>	         
+	        	</div>
+	      	</div>
+	    </div>
+	</div>
+	<!-- Modal Mensagem SOS -->
+
+	<!-- Modal Equipamentos -->
+	<div class="modal fade" id="ModalEquipamentos" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="modal_Equipamentos" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+			<div class="modal-content border border-2 border-primary rounded">
+				<div class="modal-header" style="background: white;">
+					<div class="row w-100">
+						<div class="col" align="center">
+							<font color="#172e63"> <h5> Pesquisar Equipamentos </h5> </font>
+						</div>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="btnFechaModalEquipamentos" onclick="modalFechar('modalEquipamentos');">
+	            		</button>
+					</div>
+				</div>
+				<div class="modal-body">
+	          		
+	          		<div class="container border rounded shadow py-2">
+						<div class="row">
+							<div class="col">
+								<label for="EDTNOME" class="form-label"> Apelido, Obra ou Cliente: </label>
+								{%edtPesquisar%}
+							</div>
+						</div>
+
+						<br>
+
+						<div class="row">
+							<div class="col" align="center">
+								<button type="button" class="btn btn-primary" onclick="pesquisar();">PESQUISAR</button>
+							</div>
+						</div>
+					</div>
+
+					<br>
+					<br>
+
+					<div id="TableEquipamentos" style="display: none;"></div>
+	          
+	        	</div>
+	      	</div>
+	    </div>
+	</div>
+	<!-- Modal Equipamentos -->
+
+	<!-- Modal Listar Comandos -->
+	<div class="modal fade" id="ModalComandos" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="modal_Comandos" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+			<div class="modal-content border border-2 border-primary rounded">
+				<div class="modal-header" style="background: white;">
+					<div class="row w-100">
+						<div class="col" align="center">
+							<font color="#172e63"> <h5> Comandos </h5> </font>
+						</div>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="btnFechaModalComandos" onclick="modalFechar('modalComandos'); limparFiltroListaComandos();">
+	            		</button>
+					</div>
+				</div>
+				<div class="modal-body">
+	          		<br>
+	          		<div class="row mt-2">
+	          			<div class="col" align="left">
+	          				<Strong> Filtrar: </Strong>
+	          			</div>
+	          		</div>	        
+	          		<div class="row mb-2">
+	          			<div class="col">
+	          				{%edtListarComandosFiltrar%}
+	          			</div>
+	          			<div class="col">
+	          				<button type="button" class="btn btn-outline-dark w-100" onclick="atualizarListaComandos();"> PESQUISAR </button>
+	          			</div>
+	          		</div>	         
+	          		
+	          		<br>
+
+	          		<div id="TableComandos"></div>
+	          
+	          		<br>
+	        	</div>
+	      	</div>
+	    </div>
+	</div>
+	<!-- Modal Listar Comandos -->
+
+	<!-- Modal Valores -->
+	<div class="modal fade" id="ModalValores" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="modal_Valores" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+			<div class="modal-content border border-2 border-primary rounded">
+				<div class="modal-header" style="background: white;">
+					<div class="row w-100">
+						<div class="col" align="center">
+							<font color="#172e63"> <h5> <text id="txtTituloValores"></text> </h5> </font>
+						</div>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="btnFechaModalValores" onclick="modalFechar('modalValores');">
+	            		</button>
+					</div>
+				</div>
+				<div class="modal-body">
+
+					<div class="row py-2">
+	          			<div class="col" align="center">
+	          				<font color="red"> <strong> <text id="mensagemAvisoValores"> </text> </strong> </font>
+	          			</div>
+	          		</div>
+	          		<div class="row py-2">
+	          			<div class="col">
+	          				<text id="mensagemUltimaAtualizacao">
+	          			</div>
+	          		</div>
+	          		<div class="row py-2" id="acaoValoresPendentes">
+	          			<div class="col">
+	          				<font color="red"> Atualização pendente, esperando quadro pegar a ação. </font>
+	          			</div>
+	          		</div>
+	          		<div class="row py-2">
+	          			<div class="col" align="center">
+	          				<button type="button" class="btn btn-success btn-sm" onclick="BTNATUALIZARVALORES.click();" id="btnAtualizarAcao1"> ATUALIZAR <i class="fa-solid fa-arrows-rotate"></i> </button>
+	          			</div>
+	          		</div>
+
+					<div class="row mt-2">
+	          			<div class="col" align="left">
+	          				<Strong> Filtrar: </Strong>
+	          			</div>
+	          		</div>	        
+	          		<div class="row mb-2">
+	          			<div class="col">
+	          				{%edtValoresFiltro%}
+	          			</div>
+	          		</div>	          		  		
+	          		
+
+	          		<div id="TableValores"></div>
+	          
+	          		<div class="row py-2">
+	          			<div class="col" align="center">
+	          				<button type="button" class="btn btn-success btn-sm" onclick="BTNATUALIZARVALORES.click();" id="btnAtualizarAcao2"> ATUALIZAR <i class="fa-solid fa-arrows-rotate"></i> </button>
+	          			</div>
+	          		</div>
+	        	</div>
+	      	</div>
+	    </div>
+	</div>
+	<!-- Modal Valores -->
+
+	<!-- Modal Mensagem -->
+	<div class="modal fade" id="ModalMensagem" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="1" role="dialog" aria-labelledby="modal_Mensagem" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+			<div class="modal-content border border-2 border-primary rounded">
+				<div class="modal-header" style="background: white;">
+					<div class="row w-100">
+						<div class="col" align="center">
+							<font color="#172e63"> <h5> <text id="txtTituloMensagem"></text> </h5> </font>
+						</div>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="btnFechaModalMensagem" onclick="modalFechar('modalMensagem');">
+						</button>
+					</div>
+				</div>
+				<div class="modal-body">
+					<br>
+					
+					<div id="corpoModalMensagem">
+						<!-- Preenchido automaticamente -->
+					</div>
+
+					<br>
+
+					<div class="spinner-border text-primary" role="status" id="spinnerMensagem">
+					  <span class="visually-hidden">...</span>
+					</div>
+					
+					<br>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- Modal Mensagem -->
+
+	<!-- Modal Históricos -->
+	<div class="modal fade" id="modalHistoricos" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="1" role="dialog" aria-labelledby="modal_Historicos" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+			<div class="modal-content border border-2 border-primary rounded">
+				<div class="modal-header" style="background: white;">
+					<div class="row w-100">
+						<div class="col" align="center">
+							<font color="#172e63"> <h5> <text id="txtTituloHistoricos"></text> </h5> </font>
+						</div>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="btnFechaModalHistoricos" onclick="modalFechar('modalHistoricos');">
+						</button>
+					</div>
+				</div>
+				<div class="modal-body">
+					<br>
+					
+	          		<div id="tableHistoricos"></div>
+
+					<div id="corpoHistoricos">
+						Carregando...
+					</div>	          		
+					
+					<br>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- Modal Históricos -->
+
+	<!-- Modal Liberar Equipamento -->
+	<div class="modal fade" id="modalLiberarEquipamento" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  		<div class="modal-dialog">
+    		<div class="modal-content">
+      			<div class="modal-header">
+       				<h1 class="modal-title fs-5" id="staticBackdropLabel">Liberação do Equipamento</h1>
+        			<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="btnFechaModalLiberarEquipamento" onclick="modalFechar('modalLiberarEquipamento');"></button>
+      			</div>
+      			<div class="modal-body">
+      				<br>
+
+        			<font size="3" color="red"> <strong> VOCÊ ESTÁ LIBERANDO ESSE EQUIPAMENTO? </strong> </font>
+
+        			<br>
+        			<br>
+     			</div>
+      			<div class="modal-footer">
+      				<div class="row w-100">
+      					<div class="col" align="left">
+      					  <button type="button" class="btn btn-danger w-75 py-2" onclick="btnFechaModalLiberarEquipamento.click(); liberarEquipInstalacao(0);"> NÃO </button>
+      					</div>
+      					<div class="col" align="right">
+      						<button type="button" class="btn btn-success w-75 py-2" onclick="btnFechaModalLiberarEquipamento.click(); liberarEquipInstalacao(1);"> SIM </button>
+      					</div>
+      				</div>
+      			</div>
+    		</div>
+  		</div>
+	</div>
+
+	<!-- Apenas estanciando os componentes que tem function para o javascript conseguir chamá-los ||| Estão invisíveis -->
+	<div class="row" style="display:none">
+		<div class="col">
+			{%btnVoltar%}
+			{%btnPesquisar%}
+			{%edtObra%}
+			{%btnCarregar%}
+			{%btnValores%}
+			{%edtValores%}
+			{%btnAtualizarValores%}
+			{%edtAcionarBotao%}
+			{%btnAcionarBotao%}
+			{%edtListaComando%}
+			{%edtListaComandoSemEscolha%}
+			{%btnListaComando%}
+			{%btnWhiteList%}
+			{%btnAtualizarListaComandos%}
+			{%edtHistoricos%}
+			{%btnHistoricos%}
+			{%btnEmInstalacaoAutorizar%}
+			{%btnEmInstalacaoSenha%}
+			{%edtLiberarEquip%}
+
+			<button type="button" data-bs-toggle="modal" data-bs-target="#modalLiberarEquipamento" id="btnModalLiberarEquipamento" onclick="modalAbrir('modalLiberarEquipamento');"> </button>
+			<button type="button" data-bs-toggle="modal" data-bs-target="#ModalValores" id="btnModalValores" onclick="modalAbrir('modalValores');"> </button>
+			<button type="button" data-bs-toggle="modal" data-bs-target="#ModalComandos" id="btnModalComandos" onclick="modalAbrir('modalComandos');"> </button>
+			<button type="button" data-bs-toggle="modal" data-bs-target="#ModalMensagem" id="btnModalMensagem" onclick="modalAbrir('modalMensagem');"> </button>
+			<button type="button" data-bs-toggle="modal" data-bs-target="#modalHistoricos" id="btnModalHistoricos" onclick="modalAbrir('modalHistoricos');"> </button>
+			<button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#ModalEquipamentos" onclick="modalAbrir('modalEquipamentos')" id="btnAbrirModalEquipamentos"> </button>
+		</div>
+	</div>
+
+</body>
+</html>
