@@ -1,8 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AUTH_COOKIE, createSessionCookie } from '@/lib/session';
-import { callSql, describeSqlRow, sqlNumberFromField, sqlString, sqlTextFromField } from '@/lib/sql';
+import { callSql, describeSqlRow, sqlInt, sqlNumberFromField, sqlString, sqlTextFromField } from '@/lib/sql';
 
 export const runtime = 'nodejs';
+
+async function readOptionalNumber(sql: string): Promise<number> {
+  try {
+    const rows = await callSql(sql);
+    return sqlNumberFromField(rows[0], Object.keys(rows[0] ?? {}), 0);
+  } catch (error) {
+    console.error('LOGIN_OPTIONAL_NUMBER_ERROR', error);
+    return 0;
+  }
+}
+
+async function readOptionalText(sql: string, fallback: string): Promise<string> {
+  try {
+    const rows = await callSql(sql);
+    const row = rows[0];
+    if (!row) return fallback;
+    return sqlTextFromField(row, Object.keys(row), fallback) || fallback;
+  } catch (error) {
+    console.error('LOGIN_OPTIONAL_TEXT_ERROR', error);
+    return fallback;
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,41 +36,42 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: false, message: 'Preencha usuário e senha.' }, { status: 400 });
     }
 
-    const sql = `
+    // Esta primeira consulta replica o login do IntraWeb/Delphi original.
+    // Mantemos simples: primeiro obtemos apenas o Codigo; depois carregamos os dados auxiliares.
+    const sqlCodigo = `
 select top 1
-  a.Codigo as Codigo,
-  a.Nome as Nome,
-  isnull(a.EmpresaSistema,0) as EmpresaSistema,
-  isnull(a.Departamento,0) as Departamento
+  a.Codigo as Codigo
 from Usuarios a
 left outer join Clientes b on b.Codigo = a.CodCli
 where ((a.Nick = ${sqlString(nick)}) or (b.CPFCNPJ = ${sqlString(nick)}))
-  and a.Senha = ${sqlString(senha)}`;
+  and Senha = ${sqlString(senha)}`;
 
-    const rows = await callSql(sql);
-    const row = rows[0];
+    const codigoRows = await callSql(sqlCodigo);
+    const codigoRow = codigoRows[0];
 
-    if (!row) {
+    if (!codigoRow) {
       return NextResponse.json({ ok: false, message: 'Usuário não encontrado.' }, { status: 401 });
     }
 
-    const codigo = sqlNumberFromField(row, ['Codigo', 'codigo', 'CODIGO', 'CodUsuario', 'codUsuario', 'CODUSUARIO'], 0);
-    const nome = sqlTextFromField(row, ['Nome', 'nome', 'NOME'], nick);
-    const empresaSistema = sqlNumberFromField(row, ['EmpresaSistema', 'empresasistema', 'EMPRESASISTEMA'], 0);
-    const departamento = sqlNumberFromField(row, ['Departamento', 'departamento', 'DEPARTAMENTO'], 0);
+    const codigo = sqlNumberFromField(codigoRow, ['Codigo', 'codigo', 'CODIGO', 'CodUsuario', 'codUsuario', 'CODUSUARIO'], 0);
 
     if (!codigo) {
-      console.error('LOGIN_SQL_INVALID_USER_RETURN', {
+      console.error('LOGIN_SQL_INVALID_CODIGO_RETURN', {
         nick,
-        rowDescription: describeSqlRow(row),
-        rowSample: JSON.stringify(row).slice(0, 1000)
+        rowDescription: describeSqlRow(codigoRow),
+        rowSample: JSON.stringify(codigoRow).slice(0, 1000)
       });
 
       return NextResponse.json({
         ok: false,
-        message: `Retorno de usuário inválido: ${describeSqlRow(row)}.`
+        message: `Retorno de código de usuário inválido: ${describeSqlRow(codigoRow)}.`
       }, { status: 500 });
     }
+
+    const codigoSql = sqlInt(codigo);
+    const nome = await readOptionalText(`select top 1 Nome from Usuarios where Codigo = ${codigoSql}`, nick);
+    const empresaSistema = await readOptionalNumber(`select top 1 EmpresaSistema from Usuarios where Codigo = ${codigoSql}`);
+    const departamento = await readOptionalNumber(`select top 1 Departamento from Usuarios where Codigo = ${codigoSql}`);
 
     const response = NextResponse.json({ ok: true, user: { codigo, nome, empresaSistema, departamento } });
     response.cookies.set(AUTH_COOKIE, createSessionCookie({ codigo, nome, empresaSistema, departamento }), {

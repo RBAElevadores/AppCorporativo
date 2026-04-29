@@ -73,6 +73,21 @@ export function describeSqlRow(row: SqlRow | undefined): string {
   return `colunas retornadas: ${keys.length ? keys.join(', ') : '(nenhuma)'}`;
 }
 
+function endpointErrorFromParsed(parsed: unknown): string | null {
+  const rows = Array.isArray(parsed) ? parsed : [parsed];
+  const first = rows[0];
+  if (!first || typeof first !== 'object') return null;
+  const row = first as SqlRow;
+  const keys = Object.keys(row);
+
+  const errorKey = keys.find((key) => ['erro', 'error', 'mensagemerro', 'mensagem', 'message'].includes(key.toLowerCase()));
+  if (!errorKey) return null;
+
+  const value = row[errorKey];
+  if (value === null || value === undefined || String(value).trim() === '') return 'Endpoint SQL retornou erro sem mensagem.';
+  return String(value);
+}
+
 export async function callSql(script: string): Promise<SqlRow[]> {
   const endpoint = process.env.RBA_SQL_ENDPOINT;
   if (!endpoint) {
@@ -105,6 +120,10 @@ export async function callSql(script: string): Promise<SqlRow[]> {
 
   try {
     const parsed = JSON.parse(cleaned);
+    const endpointError = endpointErrorFromParsed(parsed);
+    if (endpointError) {
+      throw new Error(`Erro retornado pelo endpoint SQL: ${endpointError}`);
+    }
     if (Array.isArray(parsed)) return parsed as SqlRow[];
     if (parsed && typeof parsed === 'object') return [parsed as SqlRow];
     return [{ Retorno: parsed }];
