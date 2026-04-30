@@ -223,7 +223,12 @@ function injectCompatibilityScript(html: string, moduleKey: string, moduleTitle:
   function setHtml(target, html){
     const targetId = target || defaultTarget;
     const el = byId(targetId) || byId(defaultTarget) || byId('corpo') || byId('atendimentos') || byId('dados') || byId('TableClientes') || byId('TableFichas') || byId('TableVistorias') || byId('tableOS') || byId('tableNotificacoes') || byId('corpoModalMensagem');
-    if (el) el.innerHTML = html || '';
+    if (el) {
+      el.innerHTML = html || '';
+      if (typeof window.RBAMainAfterRender === 'function') {
+        try { window.RBAMainAfterRender(); } catch(e) {}
+      }
+    }
   }
 
   function showMessage(title, html){
@@ -268,6 +273,9 @@ function injectCompatibilityScript(html: string, moduleKey: string, moduleTitle:
   Object.keys(actionButtons).forEach(function(id){ if (!window[id]) window[id] = byId(id); });
 
   if (loadAction) postAction(loadAction);
+  else if (typeof window.RBAMainAfterRender === 'function') {
+    try { window.RBAMainAfterRender(); } catch(e) {}
+  }
 })();
 </script>`;
 

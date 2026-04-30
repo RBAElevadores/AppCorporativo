@@ -1119,6 +1119,267 @@
         }
 
 
+
+        /* Ajustes Main V2 - padronização visual conforme RBA */
+        .rba-header {
+            height: 64px !important;
+            min-height: 64px !important;
+            padding: 0 18px !important;
+            display: grid !important;
+            grid-template-columns: 54px minmax(0, 1fr) 82px !important;
+            align-items: center !important;
+            background: #ffffff !important;
+            z-index: 3100 !important;
+        }
+
+        .rba-header .navbar-nav {
+            height: 64px !important;
+            min-height: 64px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+
+        .rba-header-center {
+            position: static !important;
+            left: auto !important;
+            top: auto !important;
+            bottom: auto !important;
+            transform: none !important;
+            grid-column: 2 !important;
+            height: 64px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+
+        .rba-header-logo {
+            position: relative !important;
+            grid-column: 3 !important;
+            height: 64px !important;
+            min-height: 64px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: flex-end !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        .rba-header-logo img {
+            display: block !important;
+            width: auto !important;
+            height: 34px !important;
+            max-width: 76px !important;
+            max-height: 34px !important;
+            object-fit: contain !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            align-self: center !important;
+            transform: translateY(3px) !important;
+        }
+
+        .menu-toggle-btn {
+            width: 38px !important;
+            height: 38px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            padding: 0 !important;
+        }
+
+        .sidenavesq {
+            z-index: 3000 !important;
+            padding-top: 82px !important;
+        }
+
+        .side-menu-btn {
+            height: 42px !important;
+            min-height: 42px !important;
+            max-height: 42px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            padding: 0 14px !important;
+            line-height: 1.1 !important;
+        }
+
+        .main-content-shell {
+            padding-top: 84px !important;
+        }
+
+        .welcome-line {
+            min-height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        #LBLBEMVINDO:empty::after {
+            content: "";
+        }
+
+        #corpo {
+            padding-left: 18px !important;
+            padding-right: 18px !important;
+        }
+
+        #corpo .row {
+            display: flex !important;
+            flex-wrap: wrap !important;
+            align-items: stretch !important;
+            row-gap: 12px !important;
+        }
+
+        #corpo .row > [class*="col"] {
+            display: flex !important;
+            align-items: stretch !important;
+        }
+
+        #corpo button.custom-btn,
+        #corpo .custom-btn,
+        #corpo button[class*="btn-"] {
+            width: 100% !important;
+            height: 44px !important;
+            min-height: 44px !important;
+            max-height: 44px !important;
+            line-height: 1.1 !important;
+            padding: 0 16px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            overflow: hidden !important;
+            white-space: nowrap !important;
+            text-overflow: ellipsis !important;
+            border-radius: 12px !important;
+            border: 0 !important;
+            z-index: auto !important;
+            position: relative !important;
+            right: auto !important;
+            bottom: auto !important;
+            top: auto !important;
+            left: auto !important;
+            transform: none !important;
+            text-align: center !important;
+            font-size: 11px !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.01em !important;
+        }
+
+        #corpo button.custom-btn *,
+        #corpo .custom-btn * {
+            line-height: 1.1 !important;
+        }
+
+        #corpo .custom-btn:before,
+        #corpo .custom-btn:after,
+        #corpo .custom-btn span:before,
+        #corpo .custom-btn span:after,
+        #corpo button[class*="btn-"]:before,
+        #corpo button[class*="btn-"]:after,
+        #corpo button[class*="btn-"] span:before,
+        #corpo button[class*="btn-"] span:after {
+            display: none !important;
+            content: none !important;
+        }
+
+        #corpo .custom-btn span,
+        #corpo button[class*="btn-"] span {
+            position: static !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: auto !important;
+            height: auto !important;
+            min-width: 0 !important;
+            min-height: 0 !important;
+            box-shadow: none !important;
+            background: transparent !important;
+            color: inherit !important;
+            transform: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            text-align: center !important;
+        }
+
+        #corpo .rba-setor-azul button.custom-btn,
+        #corpo .rba-setor-azul .custom-btn,
+        #corpo .rba-setor-azul button[class*="btn-"],
+        #corpo button.rba-btn-azul {
+            background: linear-gradient(135deg, #172e63 0%, #284b94 100%) !important;
+            color: #ffffff !important;
+            box-shadow: 0 10px 22px rgba(23, 46, 99, 0.18) !important;
+        }
+
+        #corpo .rba-setor-verde button.custom-btn,
+        #corpo .rba-setor-verde .custom-btn,
+        #corpo .rba-setor-verde button[class*="btn-"],
+        #corpo button.rba-btn-verde {
+            background: linear-gradient(135deg, #a8cf45 0%, #8fbd2f 100%) !important;
+            color: #172e63 !important;
+            box-shadow: 0 10px 22px rgba(168, 207, 69, 0.18) !important;
+        }
+
+        #corpo button.custom-btn:not(.rba-btn-verde):not(.rba-btn-azul),
+        #corpo .custom-btn:not(.rba-btn-verde):not(.rba-btn-azul),
+        #corpo button[class*="btn-"]:not(.rba-btn-verde):not(.rba-btn-azul) {
+            background: linear-gradient(135deg, #172e63 0%, #284b94 100%) !important;
+            color: #ffffff !important;
+        }
+
+        #corpo button.custom-btn:hover,
+        #corpo .custom-btn:hover,
+        #corpo button[class*="btn-"]:hover {
+            transform: translateY(-1px) !important;
+            filter: brightness(1.04) !important;
+        }
+
+        #corpo .rba-setor-titulo {
+            color: #172e63 !important;
+            font-size: 14px !important;
+            font-weight: 800 !important;
+            margin: 18px 0 10px !important;
+            display: block !important;
+        }
+
+        #corpo .rba-button-grid {
+            display: grid !important;
+            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+            gap: 14px 22px !important;
+            align-items: stretch !important;
+            margin-bottom: 22px !important;
+        }
+
+        #corpo .rba-button-cell {
+            min-width: 0 !important;
+            display: flex !important;
+            align-items: stretch !important;
+        }
+
+        #corpo .rba-button-cell button {
+            flex: 1 1 100% !important;
+        }
+
+        #corpo .rba-main-divider {
+            border: 0 !important;
+            border-top: 1px solid rgba(23, 46, 99, 0.32) !important;
+            margin: 18px 0 14px !important;
+            opacity: 1 !important;
+        }
+
+        @media (max-width: 900px) {
+            #corpo .rba-button-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            }
+        }
+
+        @media (max-width: 560px) {
+            #corpo .rba-button-grid {
+                grid-template-columns: 1fr !important;
+            }
+        }
+
+
   	</style>
 
     <script type="text/javascript">
@@ -1226,6 +1487,170 @@
 	    	observer.observe(corpo, { childList: true, subtree: true, characterData: true });
 	    });
 
+
+
+        function limparRuidoCorpoV2()
+        {
+            const corpo = document.getElementById('corpo');
+            if (!corpo) return;
+
+            const ruido = [
+                "btnFechaModalMensagem.click",
+                "btnFechaModalToken.click",
+                "$('#corpo').html",
+                "$(\"#corpo\").html",
+                "'); btnFechaModalMensagem.click();",
+                "');btnFechaModalMensagem.click();"
+            ];
+
+            const walker = document.createTreeWalker(corpo, NodeFilter.SHOW_TEXT);
+            const remover = [];
+            while (walker.nextNode())
+            {
+                const node = walker.currentNode;
+                const texto = (node.textContent || '').trim();
+                if (!texto) continue;
+                if (ruido.some(function(item){ return texto.indexOf(item) >= 0; }))
+                {
+                    remover.push(node);
+                }
+            }
+            remover.forEach(function(node){ node.remove(); });
+
+            corpo.querySelectorAll('script').forEach(function(script){ script.remove(); });
+        }
+
+        function textoLimpo(el)
+        {
+            return (el && el.textContent ? el.textContent : '')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
+        function normalizaTexto(txt)
+        {
+            return String(txt || '')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/\./g, '')
+                .replace(/\s+/g, ' ')
+                .trim()
+                .toUpperCase();
+        }
+
+        function headingSetor(el)
+        {
+            const txt = normalizaTexto(textoLimpo(el));
+            const setores = ['COMERCIAL', 'GERENCIAL', 'LOGISTICA', 'SUPORTE', 'TI'];
+            for (const setor of setores)
+            {
+                if (txt === setor || txt.indexOf(setor) === 0) return setor;
+            }
+            return '';
+        }
+
+        function botaoVisivel(btn)
+        {
+            if (!btn) return false;
+            if (btn.offsetParent === null) return false;
+            if ((btn.id || '').toUpperCase() === 'BTNSAIR') return false;
+            if ((btn.id || '').toLowerCase().indexOf('modal') >= 0) return false;
+            return textoLimpo(btn).length > 0;
+        }
+
+        function organizarCorpoMain()
+        {
+            const corpo = document.getElementById('corpo');
+            if (!corpo || corpo.dataset.rbaMainOrganizado === '1') return;
+
+            limparRuidoCorpoV2();
+
+            const children = Array.from(corpo.children);
+            const setores = [];
+            let atual = null;
+
+            children.forEach(function(el){
+                const setor = headingSetor(el);
+                if (setor)
+                {
+                    atual = { setor: setor, heading: el, nodes: [] };
+                    setores.push(atual);
+                    return;
+                }
+                if (atual) atual.nodes.push(el);
+            });
+
+            if (!setores.length) return;
+
+            setores.forEach(function(grupo, index){
+                const botoes = [];
+                grupo.nodes.forEach(function(node){
+                    node.querySelectorAll('button.custom-btn, button[class*="btn-"]').forEach(function(btn){
+                        if (botaoVisivel(btn)) botoes.push(btn);
+                    });
+                });
+
+                if (!botoes.length) return;
+
+                botoes.sort(function(a,b){
+                    return textoLimpo(a).localeCompare(textoLimpo(b), 'pt-BR', { sensitivity: 'base' });
+                });
+
+                const titulo = document.createElement('div');
+                titulo.className = 'rba-setor-titulo';
+                titulo.textContent = textoLimpo(grupo.heading) || grupo.setor;
+
+                const grade = document.createElement('div');
+                grade.className = 'rba-button-grid ' + (index % 2 === 0 ? 'rba-setor-azul' : 'rba-setor-verde');
+
+                botoes.forEach(function(btn){
+                    btn.classList.remove('rba-btn-azul', 'rba-btn-verde');
+                    btn.classList.add(index % 2 === 0 ? 'rba-btn-azul' : 'rba-btn-verde');
+                    const cell = document.createElement('div');
+                    cell.className = 'rba-button-cell';
+                    cell.appendChild(btn);
+                    grade.appendChild(cell);
+                });
+
+                const divisor = document.createElement('hr');
+                divisor.className = 'rba-main-divider';
+
+                grupo.heading.replaceWith(titulo);
+                titulo.after(grade);
+                grade.after(divisor);
+
+                grupo.nodes.forEach(function(node){
+                    if (node && node.parentNode === corpo) node.remove();
+                });
+            });
+
+            corpo.dataset.rbaMainOrganizado = '1';
+            limparRuidoCorpoV2();
+        }
+
+        function agendarOrganizarCorpoMain()
+        {
+            const corpo = document.getElementById('corpo');
+            if (!corpo) return;
+            corpo.dataset.rbaMainOrganizado = '0';
+            setTimeout(organizarCorpoMain, 0);
+            setTimeout(organizarCorpoMain, 120);
+        }
+
+        window.RBAMainAfterRender = agendarOrganizarCorpoMain;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const corpo = document.getElementById('corpo');
+            if (!corpo) return;
+            agendarOrganizarCorpoMain();
+            const observer = new MutationObserver(function(){
+                if (corpo.dataset.rbaMainOrganizando === '1') return;
+                limparRuidoCorpoV2();
+                if (corpo.dataset.rbaMainOrganizado !== '1') agendarOrganizarCorpoMain();
+            });
+            observer.observe(corpo, { childList: true, subtree: true, characterData: true });
+        });
+
 </script>
 </head>
 <body class="imgFundo">
@@ -1235,15 +1660,16 @@
 	<div id="SideEsquerda" class="sidenavesq">
 		<div class="side-menu-inner">
 			<div class="side-group-title">Acessos rápidos</div>
+
 			<div class="row">
 				<div class="col" align="center">
-					<button type="button" class="side-menu-btn primary" id="BTNNOTIFICACOES">Notificações</button>
+					<button type="button" class="side-menu-btn primary" id="BTNABRIRSAC">Abrir SAC</button>
 				</div>
 			</div>
 
 			<div class="row">
 				<div class="col" align="center">
-					<button type="button" class="side-menu-btn accent" id="BTNHOLERITES">Holerites</button>
+					<button type="button" class="side-menu-btn accent" id="BTNNOTIFICACOES">Notificações</button>
 				</div>
 			</div>
 
@@ -1252,13 +1678,13 @@
 			<div class="side-group-title">Administrativo</div>
 			<div class="row">
 				<div class="col" align="center">
-					<button type="button" class="side-menu-btn secondary" id="BTNINDICES">Índices</button>
+					<button type="button" class="side-menu-btn primary" id="BTNHOLERITES">Holerites</button>
 				</div>
 			</div>
 
 			<div class="row">
 				<div class="col" align="center">
-					<button type="button" class="side-menu-btn primary" id="BTNABRIRSAC">Abrir SAC</button>
+					<button type="button" class="side-menu-btn accent" id="BTNINDICES">Índices</button>
 				</div>
 			</div>
 		</div>
@@ -1288,7 +1714,7 @@
 
 		<div class="row mb-4" align="center">
 			<div class="col">
-				<div class="welcome-line">Bem Vindo(a) <b><span id="LBLBEMVINDO" name="lblBemVindo" data-iw-component="lblBemVindo"></span></b></div>
+				<div class="welcome-line">Bem Vindo(a) <b><span id="LBLBEMVINDO" name="lblBemVindo" data-iw-component="lblBemVindo">{%lblBemVindo%}</span></b></div>
 			</div>
 		</div>
 
