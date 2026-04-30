@@ -7,7 +7,6 @@ type LegacyParams = {
   idobra: string;
   idnotificacao: string;
   versao: string;
-  token: string;
 };
 
 function isMobile(): boolean {
@@ -21,8 +20,7 @@ function readLegacyParams(): LegacyParams {
     codusuario: params.get('codusuario') || '',
     idobra: params.get('idobra') || '',
     idnotificacao: params.get('idnotificacao') || '',
-    versao: params.get('versao') || '',
-    token: params.get('token') || ''
+    versao: params.get('versao') || ''
   };
 }
 
@@ -38,11 +36,10 @@ export default function LoginPage() {
     codusuario: '',
     idobra: '',
     idnotificacao: '',
-    versao: '',
-    token: ''
+    versao: ''
   });
 
-  const edtVaiProMain = useMemo(() => (legacyParams.codusuario ? '' : '1'), [legacyParams.codusuario]);
+  const edtVaiProMain = useMemo(() => (Number.parseInt(legacyParams.codusuario || '0', 10) > 0 ? '' : '1'), [legacyParams.codusuario]);
 
   useEffect(() => {
     const detectedMobilePC = isMobile() ? 'mobile' : 'pc';
@@ -53,7 +50,7 @@ export default function LoginPage() {
 
     const timer = window.setTimeout(() => setVisible(true), 800);
 
-    if (params.codusuario) {
+    if (Number.parseInt(params.codusuario || '0', 10) > 0) {
       setLoading(true);
       fetch('/api/auth/direct', {
         method: 'POST',

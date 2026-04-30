@@ -41,45 +41,10 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json() as Record<string, unknown>;
     const codUsuario = parseIntParam(body.codusuario ?? body.codUsuario, 0);
-    const token = String(body.token ?? '').trim();
     const mobilePC = String(body.mobilePC ?? '');
     const pCodAtendimento = parseIntParam(body.idobra ?? body.pCodAtendimento, 0);
     const idNotificacao = parseIntParam(body.idnotificacao ?? body.idNotificacao, -1);
     const versao = String(body.versao ?? '').trim();
-
-    if (codUsuario === -1) {
-      if (!token) {
-        return NextResponse.json({ ok: false, message: 'Token não informado para acesso restrito.' }, { status: 400 });
-      }
-
-      const session = {
-        codigo: -1,
-        codUsuario: -1,
-        nome: 'Terceiro',
-        empresaSistema: 0,
-        departamento: 0,
-        mobilePC,
-        idNotificacao,
-        pCodAtendimento,
-        codEmpresa: 0,
-        obra: 0,
-        atendimento: 0,
-        iamSOS: 0,
-        tipoNotificacao: '',
-        tokenTerceiro: token,
-        restrito: true
-      };
-
-      const response = NextResponse.json({ ok: true, user: session, redirectTo: '/legacy-runtime/main-restrito' });
-      response.cookies.set(AUTH_COOKIE, createSessionCookie(session), {
-        httpOnly: true,
-        sameSite: 'lax',
-        secure: process.env.NODE_ENV === 'production',
-        path: '/',
-        maxAge: 60 * 60 * 12
-      });
-      return response;
-    }
 
     if (codUsuario <= 0) {
       return NextResponse.json({ ok: false, message: 'codusuario inválido.' }, { status: 400 });
@@ -101,8 +66,7 @@ export async function POST(request: NextRequest) {
       obra: 0,
       atendimento: 0,
       iamSOS: 0,
-      tipoNotificacao: '',
-      tokenTerceiro: ''
+      tipoNotificacao: ''
     };
 
     const response = NextResponse.json({ ok: true, user: session, redirectTo: '/legacy-runtime/main' });

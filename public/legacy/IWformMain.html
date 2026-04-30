@@ -909,24 +909,7 @@
 	    {
 	    	console.log("DOWNLOAD http://steflifts.ddns.net:7000/arquivos/rbaiamcabo.apk");
 	    }
-
-	    function validarToken()
-	    {
-	    	const isBlank = (document.getElementById('token')?.value || '').trim() === '';
-			if (isBlank)
-	    	{
-	    		alert("Digite o token primeiro!");
-	    	}
-	    	else
-	    	{
-	    		document.getElementById('EDTTOKEN').value = document.getElementById('token').value;
-		        AddChangedControl('EDTTOKEN'); //Serve para forçar alterar o valor, caso de evento async
-
-		        BTNTOKEN.click();
-	    	}
-	    }
-
-    </script>
+</script>
 </head>
 <body class="imgFundo">
 
@@ -1076,47 +1059,6 @@
 	</div>
 	<!-- Modal Mensagem -->
 
-	<!-- Modal Token -->
-	<div class="modal fade" id="ModalToken" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="modal_Token" aria-hidden="true">
-		<div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
-			<div class="modal-content border border-2 border-primary rounded">
-				<div class="modal-header" style="background: white;">
-					<div class="row w-100">
-						<div class="col" align="center">
-							<font color="#172e63" onclick="btnFechaModalToken.click();"> <h5> Autenticação por Token </h5> </font>
-						</div>
-					</div>
-				</div>
-				<div class="modal-body">
-					
-					<div class="row mt-2">
-						<div class="col">
-							<font color="#172e63" onclick=""> Foi enviado um token para o seu WhatsApp. <br><br> Por favor, digite-o abaixo para validar: </font>
-						</div>
-					</div>
-
-					<br>
-
-					<div class="row">
-						<div class="col">
-							<input type="text" class="form-control" id="token">
-						</div>
-					</div>
-
-					<br>
-					<hr>
-
-					<div class="row">
-						<div class="col" align="right">
-							<button type="button" class="btn btn-success btn-lg" onclick="validarToken();"> VALIDAR TOKEN </button>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<!-- Modal Token -->
-
 	<!-- Apenas estanciando os componentes que tem function para o javascript conseguir chamá-los ||| Estão invisíveis -->
 	<div class="row" style="display:none">
 		<div class="col">
@@ -1133,14 +1075,9 @@
 			<button type="button" id="BTNQUERY" name="btnQuery" data-iw-component="btnQuery" class="btn btn-outline-dark legacy-btn">Query</button>
 			<button type="button" id="BTNACOESESPECIAIS" name="btnAcoesEspeciais" data-iw-component="btnAcoesEspeciais" class="btn btn-outline-dark legacy-btn">Acoes Especiais</button>
 
-			<input type="text" id="EDTTOKEN" name="edtToken" data-iw-component="edtToken" class="form-control legacy-input" />
-			<button type="button" id="BTNTOKEN" name="btnToken" data-iw-component="btnToken" class="btn btn-outline-dark legacy-btn">Token</button>
-
 			<button type="button" id="BTNSAIR" name="btnSair" data-iw-component="btnSair" class="btn btn-outline-dark legacy-btn">Sair</button>
 
 			<button type="button" data-bs-toggle="modal" data-bs-target="#ModalMensagem" id="btnModalMensagem"> </button>
-			<button type="button" data-bs-toggle="modal" data-bs-target="#ModalToken" id="btnModalToken"> </button>
-			<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="btnFechaModalToken"></button>
 		</div>
 	</div>
 

@@ -42,8 +42,6 @@ const COMPONENT_IDS: Record<string, string> = {
   btnQuery: 'BTNQUERY',
   btnAcoesEspeciais: 'BTNACOESPECIAIS',
   btnSair: 'BTNSAIR',
-  btnToken: 'BTNTOKEN',
-  edtToken: 'EDTTOKEN',
   btnVoltar: 'BTNVOLTAR',
   btnAtender: 'BTNATENDER',
   btnPesquisar: 'BTNPESQUISAR',

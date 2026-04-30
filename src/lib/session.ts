@@ -17,8 +17,6 @@ export type AppSession = {
   idNotificacao: number;
   pCodAtendimento: number;
   tipoNotificacao: string;
-  tokenTerceiro: string;
-  restrito?: boolean;
   MobilePC: string;
   CodUsuario: number;
   CodEmpresa: number;
@@ -30,7 +28,6 @@ export type AppSession = {
   IDNotificacao: number;
   PCodAtendimento: number;
   TipoNotificacao: string;
-  TokenTerceiro: string;
 };
 
 function secret(): string {
@@ -66,7 +63,6 @@ export function normalizeSession(input: Partial<AppSession>): AppSession {
   const idNotificacao = input.idNotificacao === undefined && input.IDNotificacao === undefined ? -1 : numberOrZero(input.idNotificacao ?? input.IDNotificacao);
   const pCodAtendimento = numberOrZero(input.pCodAtendimento ?? input.PCodAtendimento);
   const tipoNotificacao = stringOrEmpty(input.tipoNotificacao ?? input.TipoNotificacao);
-  const tokenTerceiro = stringOrEmpty(input.tokenTerceiro ?? input.TokenTerceiro);
 
   return {
     codigo: codUsuario,
@@ -82,8 +78,6 @@ export function normalizeSession(input: Partial<AppSession>): AppSession {
     idNotificacao,
     pCodAtendimento,
     tipoNotificacao,
-    tokenTerceiro,
-    restrito: input.restrito,
     MobilePC: mobilePC,
     CodUsuario: codUsuario,
     CodEmpresa: codEmpresa,
@@ -94,8 +88,7 @@ export function normalizeSession(input: Partial<AppSession>): AppSession {
     IAMSOS: iamSOS,
     IDNotificacao: idNotificacao,
     PCodAtendimento: pCodAtendimento,
-    TipoNotificacao: tipoNotificacao,
-    TokenTerceiro: tokenTerceiro
+    TipoNotificacao: tipoNotificacao
   };
 }
 

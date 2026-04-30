@@ -125,8 +125,7 @@ where ((a.Nick = ${sqlString(nick)}) or (b.CPFCNPJ = ${sqlString(nick)}))
       obra: 0,
       atendimento: 0,
       iamSOS: 0,
-      tipoNotificacao: '',
-      tokenTerceiro: ''
+      tipoNotificacao: ''
     };
 
     const response = NextResponse.json({ ok: true, user: session, redirectTo });

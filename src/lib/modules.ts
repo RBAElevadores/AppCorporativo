@@ -334,14 +334,6 @@ export const MODULES: Record<string, ModuleDefinition> = {
     fields: [{ name: 'script', label: 'Script SQL', type: 'textarea' }],
     actions: [{ id: 'executar', label: 'Executar', variant: 'danger', confirm: 'Esta ação executa SQL. Confirma?' }]
   },
-  'main-restrito': {
-    key: 'main-restrito',
-    title: 'Menu Restrito',
-    description: 'Menu restrito usado no acesso de terceiros por token.',
-    legacyTemplate: 'IWformMainRestrito.html',
-    fields: [],
-    actions: []
-  },
   'informacoes-empresa': {
     key: 'informacoes-empresa',
     title: 'Informações da Empresa',
