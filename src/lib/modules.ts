@@ -284,15 +284,6 @@ export const MODULES: Record<string, ModuleDefinition> = {
       { id: 'carregar', label: 'Carregar orientação', variant: 'success' }
     ]
   },
-  ramais: {
-    key: 'ramais',
-    title: 'Ramais',
-    description: 'Lista de ramais corporativos.',
-    legacyTemplate: 'IWformRamais.html',
-    loadAction: 'listar',
-    fields: [],
-    actions: [{ id: 'listar', label: 'Atualizar ramais', variant: 'primary' }]
-  },
   'plantonistas-sos': {
     key: 'plantonistas-sos',
     title: 'Plantonistas SOS',

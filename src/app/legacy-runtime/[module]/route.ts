@@ -22,7 +22,6 @@ const NAV_BUTTONS: Record<string, string> = {
   BTNACOESPECIAIS: '/legacy-runtime/acoes-especiais',
   BTNNOTIFICACOES: '/legacy-runtime/notificacoes',
   BTNHOLERITES: '/legacy-runtime/holerites',
-  BTNRAMAIS: '/legacy-runtime/ramais',
   BTNINDICES: '/legacy-runtime/indices',
   BTNABRIRSAC: '/legacy-runtime/abrir-sac',
   BTNIAMONLINECHAT: '/legacy-runtime/iam-online'
