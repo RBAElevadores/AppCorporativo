@@ -2,47 +2,61 @@
 
 import { FormEvent, useEffect, useState } from 'react';
 
+function isMobile(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  return /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i.test(navigator.userAgent || '');
+}
+
 export default function LoginPage() {
   const [nick, setNick] = useState('');
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
   const [loading, setLoading] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const [mobilePC, setMobilePC] = useState('pc');
+  const [clickStep, setClickStep] = useState(0);
 
   useEffect(() => {
+    setMobilePC(isMobile() ? 'mobile' : 'pc');
+    const timer = window.setTimeout(() => setVisible(true), 800);
+
     const params = new URLSearchParams(window.location.search);
     const codusuario = params.get('codusuario');
-    if (!codusuario) return;
-    setLoading(true);
-    fetch('/api/auth/direct', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ codusuario })
-    })
-      .then(async (response) => {
-        const data = await response.json();
-        if (!response.ok || !data.ok) throw new Error(data.message || 'Login direto legado falhou.');
-        window.location.href = '/app';
+    if (codusuario) {
+      setLoading(true);
+      fetch('/api/auth/direct', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ codusuario })
       })
-      .catch((err) => setErro(err instanceof Error ? err.message : 'Login direto legado falhou.'))
-      .finally(() => setLoading(false));
+        .then(async (response) => {
+          const data = await response.json();
+          if (!response.ok || !data.ok) throw new Error(data.message || 'Login direto legado falhou.');
+          window.location.href = '/legacy-runtime/main';
+        })
+        .catch((err) => setErro(err instanceof Error ? err.message : 'Login direto legado falhou.'))
+        .finally(() => setLoading(false));
+    }
+
+    return () => window.clearTimeout(timer);
   }, []);
 
-  async function entrar(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function entrar(event?: FormEvent<HTMLFormElement>) {
+    event?.preventDefault();
     setErro('');
     setLoading(true);
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nick, senha })
+        body: JSON.stringify({ nick, senha, mobilePC })
       });
       const data = await response.json();
       if (!response.ok || !data.ok) {
         setErro(data.message || 'Usuário não encontrado.');
         return;
       }
-      window.location.href = '/app';
+      window.location.href = '/legacy-runtime/main';
     } catch (error) {
       setErro(error instanceof Error ? error.message : 'Erro ao entrar.');
     } finally {
@@ -50,31 +64,108 @@ export default function LoginPage() {
     }
   }
 
+  function cliqueImagem() {
+    if (clickStep === 0 || clickStep === 2) {
+      const next = clickStep + 1;
+      setClickStep(next);
+      if (next === 3) void entrar();
+    } else {
+      setClickStep(0);
+    }
+  }
+
+  function cliqueTexto() {
+    if (clickStep === 1) {
+      setClickStep(2);
+    } else {
+      setClickStep(0);
+    }
+  }
+
   return (
-    <main className="container d-flex align-items-center justify-content-center min-vh-100 py-5">
-      <div className="card rba-card p-4" style={{ maxWidth: 430, width: '100%' }}>
-        <div className="text-center mb-4">
-          <img src="/wwwroot/Logo.png" alt="RBA" className="img-fluid mb-3" style={{ maxHeight: 120 }} />
-          <h1 className="h4 mb-1">Técnico Online</h1>
-          <p className="text-muted mb-0">App Corporativo RBA</p>
+    <>
+      <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
+      <main style={{ background: '#132955', minHeight: '100vh', position: 'relative' }}>
+        <div className="container-fluid" style={{ position: 'absolute', textAlign: 'center' }}>
+          <img src="/wwwroot/Logo.png" width="110" height="110" className="img-fluid rounded" onClick={cliqueImagem} alt="RBA" />
         </div>
 
-        {erro && <div className="alert alert-danger">{erro}</div>}
+        <div className="container h-100" style={{ minHeight: '100vh', textAlign: 'center' }}>
+          <div className="row h-100 align-items-center" style={{ minHeight: '100vh' }}>
+            <div className="col">
+              {!visible && <span id="carregando" style={{ color: 'white' }}><strong> Carregando... </strong></span>}
 
-        <form onSubmit={entrar} className="d-grid gap-3">
-          <div>
-            <label className="form-label">Nick ou CPF/CNPJ</label>
-            <input className="form-control form-control-lg" value={nick} onChange={(e) => setNick(e.target.value)} autoFocus />
+              <form
+                onSubmit={entrar}
+                id="contMeio"
+                className={`container border border-light rounded shadow${mobilePC === 'pc' ? ' w-50' : ''}`}
+                style={{ background: 'white', display: visible ? 'block' : 'none' }}
+              >
+                <br />
+                <div className="row mx-4">
+                  <div className="col" onClick={cliqueTexto}>
+                    <b> TÉCNICO ONLINE </b>
+                  </div>
+                </div>
+
+                <br />
+                {erro && (
+                  <div className="row mx-4">
+                    <div className="col">
+                      <div className="alert alert-danger py-2 mb-0">{erro}</div>
+                    </div>
+                  </div>
+                )}
+                {erro && <br />}
+
+                <div className="row mx-4">
+                  <div className="col">
+                    <input
+                      id="EDTNICK"
+                      className="form-control"
+                      value={nick}
+                      onChange={(e) => setNick(e.target.value)}
+                      autoComplete="username"
+                      autoFocus
+                    />
+                  </div>
+                </div>
+
+                <br />
+
+                <div className="row mx-4">
+                  <div className="col">
+                    <input
+                      id="EDTSENHA"
+                      className="form-control"
+                      type="password"
+                      value={senha}
+                      onChange={(e) => setSenha(e.target.value)}
+                      autoComplete="current-password"
+                    />
+                  </div>
+                </div>
+
+                <br />
+
+                <div className="row mx-4">
+                  <div className="col">
+                    <button id="BTNENTRAR" type="submit" className="btn btn-primary w-100" disabled={loading}>
+                      {loading ? 'ENTRANDO...' : 'ENTRAR'}
+                    </button>
+                  </div>
+                </div>
+
+                <br />
+                <br />
+
+                <input type="hidden" id="EDTMOBILEPC" value={mobilePC} readOnly />
+                <input type="hidden" id="EDTVAIPROMAIN" value="0" readOnly />
+              </form>
+            </div>
           </div>
-          <div>
-            <label className="form-label">Senha</label>
-            <input className="form-control form-control-lg" type="password" value={senha} onChange={(e) => setSenha(e.target.value)} />
-          </div>
-          <button className="btn btn-primary btn-lg" disabled={loading}>
-            {loading ? 'Entrando...' : 'Entrar'}
-          </button>
-        </form>
-      </div>
-    </main>
+        </div>
+      </main>
+    </>
   );
 }
