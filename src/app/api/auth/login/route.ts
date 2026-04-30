@@ -4,6 +4,27 @@ import { callSql, describeSqlRow, sqlInt, sqlNumberFromField, sqlString, sqlText
 
 export const runtime = 'nodejs';
 
+type LoginContext = {
+  mobilePC: string;
+  pCodAtendimento: number;
+  idNotificacao: number;
+  versao: string;
+};
+
+function parseIntParam(value: unknown, fallback = 0): number {
+  const parsed = Number.parseInt(String(value ?? '').trim(), 10);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function parseLoginContext(body: Record<string, unknown>): LoginContext {
+  return {
+    mobilePC: String(body.mobilePC ?? ''),
+    pCodAtendimento: parseIntParam(body.idobra ?? body.pCodAtendimento, 0),
+    idNotificacao: parseIntParam(body.idnotificacao ?? body.idNotificacao, -1),
+    versao: String(body.versao ?? '').trim()
+  };
+}
+
 async function readOptionalNumber(sql: string): Promise<number> {
   try {
     const rows = await callSql(sql);
@@ -26,18 +47,32 @@ async function readOptionalText(sql: string, fallback: string): Promise<string> 
   }
 }
 
+async function tryUpdateVersion(codigo: number, versao: string): Promise<void> {
+  if (!codigo || !versao) return;
+  const safeVersion = versao.replace(/[^0-9.]/g, '');
+  if (!safeVersion) return;
+  try {
+    await callSql(`update Usuarios set VersaoAppCorporativo = 0${safeVersion} where Codigo = 0${sqlInt(codigo)}`);
+  } catch (error) {
+    console.error('LOGIN_VERSION_UPDATE_ERROR', error);
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body = await request.json() as Record<string, unknown>;
     const nick = String(body.nick ?? '').trim();
     const senha = String(body.senha ?? '').trim();
+    const context = parseLoginContext(body);
 
-    if (!nick || !senha) {
-      return NextResponse.json({ ok: false, message: 'Preencha usuário e senha.' }, { status: 400 });
+    if (!nick) {
+      return NextResponse.json({ ok: false, message: 'Preencha seu Nick antes de entrar!' }, { status: 400 });
     }
 
-    // Esta primeira consulta replica o login do IntraWeb/Delphi original.
-    // Mantemos simples: primeiro obtemos apenas o Codigo; depois carregamos os dados auxiliares.
+    if (!senha) {
+      return NextResponse.json({ ok: false, message: 'Preencha sua Senha antes de entrar!' }, { status: 400 });
+    }
+
     const sqlCodigo = `
 select top 1
   a.Codigo as Codigo
@@ -50,7 +85,7 @@ where ((a.Nick = ${sqlString(nick)}) or (b.CPFCNPJ = ${sqlString(nick)}))
     const codigoRow = codigoRows[0];
 
     if (!codigoRow) {
-      return NextResponse.json({ ok: false, message: 'Usuário não encontrado.' }, { status: 401 });
+      return NextResponse.json({ ok: false, message: 'Usuário não encontrado!' }, { status: 401 });
     }
 
     const codigo = sqlNumberFromField(codigoRow, ['Codigo', 'codigo', 'CODIGO', 'CodUsuario', 'codUsuario', 'CODUSUARIO'], 0);
@@ -73,8 +108,29 @@ where ((a.Nick = ${sqlString(nick)}) or (b.CPFCNPJ = ${sqlString(nick)}))
     const empresaSistema = await readOptionalNumber(`select top 1 EmpresaSistema from Usuarios where Codigo = ${codigoSql}`);
     const departamento = await readOptionalNumber(`select top 1 Departamento from Usuarios where Codigo = ${codigoSql}`);
 
-    const response = NextResponse.json({ ok: true, user: { codigo, nome, empresaSistema, departamento } });
-    response.cookies.set(AUTH_COOKIE, createSessionCookie({ codigo, nome, empresaSistema, departamento }), {
+    await tryUpdateVersion(codigo, context.versao);
+
+    const redirectTo = context.pCodAtendimento > 0 ? '/legacy-runtime/principal' : '/legacy-runtime/main';
+
+    const session = {
+      codigo,
+      codUsuario: codigo,
+      nome,
+      empresaSistema,
+      departamento,
+      mobilePC: context.mobilePC,
+      idNotificacao: context.idNotificacao,
+      pCodAtendimento: context.pCodAtendimento,
+      codEmpresa: 0,
+      obra: 0,
+      atendimento: 0,
+      iamSOS: 0,
+      tipoNotificacao: '',
+      tokenTerceiro: ''
+    };
+
+    const response = NextResponse.json({ ok: true, user: session, redirectTo });
+    response.cookies.set(AUTH_COOKIE, createSessionCookie(session), {
       httpOnly: true,
       sameSite: 'lax',
       secure: process.env.NODE_ENV === 'production',

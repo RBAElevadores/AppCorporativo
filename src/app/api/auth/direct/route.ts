@@ -4,29 +4,109 @@ import { callSql, sqlInt, sqlNumberFromField, sqlTextFromField } from '@/lib/sql
 
 export const runtime = 'nodejs';
 
+function parseIntParam(value: unknown, fallback = 0): number {
+  const parsed = Number.parseInt(String(value ?? '').trim(), 10);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+async function updateVersionIfNeeded(codUsuario: number, versao: string): Promise<void> {
+  if (!codUsuario || !versao) return;
+  try {
+    const safeVersion = String(versao).replace(/[^0-9.]/g, '');
+    if (!safeVersion) return;
+    await callSql(`update Usuarios set VersaoAppCorporativo = 0${safeVersion} where Codigo = 0${sqlInt(codUsuario)}`);
+  } catch (error) {
+    console.error('DIRECT_LOGIN_VERSION_UPDATE_ERROR', error);
+  }
+}
+
+async function readUser(codUsuario: number) {
+  try {
+    const rows = await callSql(`select top 1 Codigo as Codigo, Nome as Nome, isnull(EmpresaSistema,0) as EmpresaSistema, isnull(Departamento,0) as Departamento from Usuarios where Codigo = 0${sqlInt(codUsuario)}`);
+    const row = rows[0];
+    if (!row) return null;
+    return {
+      codigo: sqlNumberFromField(row, ['Codigo', 'codigo', 'CODIGO'], codUsuario),
+      nome: sqlTextFromField(row, ['Nome', 'nome', 'NOME'], `Usuário ${codUsuario}`),
+      empresaSistema: sqlNumberFromField(row, ['EmpresaSistema', 'empresasistema', 'EMPRESASISTEMA'], 0),
+      departamento: sqlNumberFromField(row, ['Departamento', 'departamento', 'DEPARTAMENTO'], 0)
+    };
+  } catch (error) {
+    console.error('DIRECT_LOGIN_READ_USER_ERROR', error);
+    return null;
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
-    if (process.env.RBA_ALLOW_LEGACY_DIRECT_LOGIN !== 'true') {
-      return NextResponse.json({ ok: false, message: 'Login direto legado desativado. Configure RBA_ALLOW_LEGACY_DIRECT_LOGIN=true somente se necessário.' }, { status: 403 });
+    const body = await request.json() as Record<string, unknown>;
+    const codUsuario = parseIntParam(body.codusuario ?? body.codUsuario, 0);
+    const token = String(body.token ?? '').trim();
+    const mobilePC = String(body.mobilePC ?? '');
+    const pCodAtendimento = parseIntParam(body.idobra ?? body.pCodAtendimento, 0);
+    const idNotificacao = parseIntParam(body.idnotificacao ?? body.idNotificacao, -1);
+    const versao = String(body.versao ?? '').trim();
+
+    if (codUsuario === -1) {
+      if (!token) {
+        return NextResponse.json({ ok: false, message: 'Token não informado para acesso restrito.' }, { status: 400 });
+      }
+
+      const session = {
+        codigo: -1,
+        codUsuario: -1,
+        nome: 'Terceiro',
+        empresaSistema: 0,
+        departamento: 0,
+        mobilePC,
+        idNotificacao,
+        pCodAtendimento,
+        codEmpresa: 0,
+        obra: 0,
+        atendimento: 0,
+        iamSOS: 0,
+        tipoNotificacao: '',
+        tokenTerceiro: token,
+        restrito: true
+      };
+
+      const response = NextResponse.json({ ok: true, user: session, redirectTo: '/legacy-runtime/main-restrito' });
+      response.cookies.set(AUTH_COOKIE, createSessionCookie(session), {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        path: '/',
+        maxAge: 60 * 60 * 12
+      });
+      return response;
     }
 
-    const body = await request.json();
-    const codUsuario = sqlInt(body.codusuario ?? body.codUsuario);
-    if (codUsuario === '0') return NextResponse.json({ ok: false, message: 'codusuario inválido.' }, { status: 400 });
+    if (codUsuario <= 0) {
+      return NextResponse.json({ ok: false, message: 'codusuario inválido.' }, { status: 400 });
+    }
 
-    const rows = await callSql(`select top 1 Codigo as Codigo, Nome as Nome, isnull(EmpresaSistema,0) as EmpresaSistema, isnull(Departamento,0) as Departamento from Usuarios where Codigo = 0${codUsuario}`);
-    const row = rows[0];
-    if (!row) return NextResponse.json({ ok: false, message: 'Usuário não encontrado.' }, { status: 404 });
+    await updateVersionIfNeeded(codUsuario, versao);
 
-    const codigo = sqlNumberFromField(row, ['Codigo', 'codigo', 'CODIGO'], 0);
-    const nome = sqlTextFromField(row, ['Nome', 'nome', 'NOME'], 'Usuário');
-    const empresaSistema = sqlNumberFromField(row, ['EmpresaSistema', 'empresasistema', 'EMPRESASISTEMA'], 0);
-    const departamento = sqlNumberFromField(row, ['Departamento', 'departamento', 'DEPARTAMENTO'], 0);
+    const user = await readUser(codUsuario);
+    const session = {
+      codigo: user?.codigo ?? codUsuario,
+      codUsuario: user?.codigo ?? codUsuario,
+      nome: user?.nome ?? `Usuário ${codUsuario}`,
+      empresaSistema: user?.empresaSistema ?? 0,
+      departamento: user?.departamento ?? 0,
+      mobilePC,
+      idNotificacao,
+      pCodAtendimento,
+      codEmpresa: 0,
+      obra: 0,
+      atendimento: 0,
+      iamSOS: 0,
+      tipoNotificacao: '',
+      tokenTerceiro: ''
+    };
 
-    if (!codigo) return NextResponse.json({ ok: false, message: 'Retorno de usuário inválido.' }, { status: 500 });
-
-    const response = NextResponse.json({ ok: true, user: { codigo, nome, empresaSistema, departamento } });
-    response.cookies.set(AUTH_COOKIE, createSessionCookie({ codigo, nome, empresaSistema, departamento }), {
+    const response = NextResponse.json({ ok: true, user: session, redirectTo: '/legacy-runtime/main' });
+    response.cookies.set(AUTH_COOKIE, createSessionCookie(session), {
       httpOnly: true,
       sameSite: 'lax',
       secure: process.env.NODE_ENV === 'production',
@@ -35,6 +115,7 @@ export async function POST(request: NextRequest) {
     });
     return response;
   } catch (error) {
+    console.error('DIRECT_LOGIN_ERROR', error);
     return NextResponse.json({ ok: false, message: error instanceof Error ? error.message : 'Erro no login direto.' }, { status: 500 });
   }
 }

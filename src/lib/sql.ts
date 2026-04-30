@@ -118,18 +118,21 @@ export async function callSql(script: string): Promise<SqlRow[]> {
   const cleaned = text.replace(/^\uFEFF/, '').trim();
   if (!cleaned) return [];
 
+  let parsed: unknown;
   try {
-    const parsed = JSON.parse(cleaned);
-    const endpointError = endpointErrorFromParsed(parsed);
-    if (endpointError) {
-      throw new Error(`Erro retornado pelo endpoint SQL: ${endpointError}`);
-    }
-    if (Array.isArray(parsed)) return parsed as SqlRow[];
-    if (parsed && typeof parsed === 'object') return [parsed as SqlRow];
-    return [{ Retorno: parsed }];
+    parsed = JSON.parse(cleaned);
   } catch {
     return [{ Retorno: cleaned }];
   }
+
+  const endpointError = endpointErrorFromParsed(parsed);
+  if (endpointError) {
+    throw new Error(`Erro retornado pelo endpoint SQL: ${endpointError}`);
+  }
+
+  if (Array.isArray(parsed)) return parsed as SqlRow[];
+  if (parsed && typeof parsed === 'object') return [parsed as SqlRow];
+  return [{ Retorno: parsed }];
 }
 
 export async function sqlScalar(script: string): Promise<string> {

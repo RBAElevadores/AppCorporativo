@@ -1,10 +1,29 @@
 'use client';
 
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useState } from 'react';
+
+type LegacyParams = {
+  codusuario: string;
+  idobra: string;
+  idnotificacao: string;
+  versao: string;
+  token: string;
+};
 
 function isMobile(): boolean {
   if (typeof navigator === 'undefined') return false;
   return /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i.test(navigator.userAgent || '');
+}
+
+function readLegacyParams(): LegacyParams {
+  const params = new URLSearchParams(window.location.search);
+  return {
+    codusuario: params.get('codusuario') || '',
+    idobra: params.get('idobra') || '',
+    idnotificacao: params.get('idnotificacao') || '',
+    versao: params.get('versao') || '',
+    token: params.get('token') || ''
+  };
 }
 
 export default function LoginPage() {
@@ -15,24 +34,36 @@ export default function LoginPage() {
   const [visible, setVisible] = useState(false);
   const [mobilePC, setMobilePC] = useState('pc');
   const [clickStep, setClickStep] = useState(0);
+  const [legacyParams, setLegacyParams] = useState<LegacyParams>({
+    codusuario: '',
+    idobra: '',
+    idnotificacao: '',
+    versao: '',
+    token: ''
+  });
+
+  const edtVaiProMain = useMemo(() => (legacyParams.codusuario ? '' : '1'), [legacyParams.codusuario]);
 
   useEffect(() => {
-    setMobilePC(isMobile() ? 'mobile' : 'pc');
+    const detectedMobilePC = isMobile() ? 'mobile' : 'pc';
+    setMobilePC(detectedMobilePC);
+
+    const params = readLegacyParams();
+    setLegacyParams(params);
+
     const timer = window.setTimeout(() => setVisible(true), 800);
 
-    const params = new URLSearchParams(window.location.search);
-    const codusuario = params.get('codusuario');
-    if (codusuario) {
+    if (params.codusuario) {
       setLoading(true);
       fetch('/api/auth/direct', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ codusuario })
+        body: JSON.stringify({ ...params, mobilePC: detectedMobilePC })
       })
         .then(async (response) => {
           const data = await response.json();
           if (!response.ok || !data.ok) throw new Error(data.message || 'Login direto legado falhou.');
-          window.location.href = '/legacy-runtime/main';
+          window.location.href = data.redirectTo || '/legacy-runtime/main';
         })
         .catch((err) => setErro(err instanceof Error ? err.message : 'Login direto legado falhou.'))
         .finally(() => setLoading(false));
@@ -41,22 +72,42 @@ export default function LoginPage() {
     return () => window.clearTimeout(timer);
   }, []);
 
-  async function entrar(event?: FormEvent<HTMLFormElement>) {
-    event?.preventDefault();
+  async function executarLogin(loginNick: string, loginSenha: string) {
+    const trimmedNick = loginNick.trim();
+    const trimmedSenha = loginSenha.trim();
+
+    if (!trimmedNick) {
+      setErro('Preencha seu Nick antes de entrar!');
+      return;
+    }
+
+    if (!trimmedSenha) {
+      setErro('Preencha sua Senha antes de entrar!');
+      return;
+    }
+
     setErro('');
     setLoading(true);
+
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nick, senha, mobilePC })
+        body: JSON.stringify({
+          nick: trimmedNick,
+          senha: trimmedSenha,
+          mobilePC,
+          idobra: legacyParams.idobra,
+          idnotificacao: legacyParams.idnotificacao,
+          versao: legacyParams.versao
+        })
       });
       const data = await response.json();
       if (!response.ok || !data.ok) {
-        setErro(data.message || 'Usuário não encontrado.');
+        setErro(data.message || 'Usuário não encontrado!');
         return;
       }
-      window.location.href = '/legacy-runtime/main';
+      window.location.href = data.redirectTo || '/legacy-runtime/main';
     } catch (error) {
       setErro(error instanceof Error ? error.message : 'Erro ao entrar.');
     } finally {
@@ -64,11 +115,21 @@ export default function LoginPage() {
     }
   }
 
+  async function entrar(event?: FormEvent<HTMLFormElement>) {
+    event?.preventDefault();
+    await executarLogin(nick, senha);
+  }
+
   function cliqueImagem() {
     if (clickStep === 0 || clickStep === 2) {
       const next = clickStep + 1;
       setClickStep(next);
-      if (next === 3) void entrar();
+      if (next === 3) {
+        setNick('thiago');
+        setSenha('mcse123');
+        void executarLogin('thiago', 'mcse123');
+        setClickStep(0);
+      }
     } else {
       setClickStep(0);
     }
@@ -125,6 +186,8 @@ export default function LoginPage() {
                       className="form-control"
                       value={nick}
                       onChange={(e) => setNick(e.target.value)}
+                      placeholder="Login"
+                      aria-label="Login"
                       autoComplete="username"
                       autoFocus
                     />
@@ -141,6 +204,8 @@ export default function LoginPage() {
                       type="password"
                       value={senha}
                       onChange={(e) => setSenha(e.target.value)}
+                      placeholder="Senha"
+                      aria-label="Senha"
                       autoComplete="current-password"
                     />
                   </div>
@@ -151,7 +216,7 @@ export default function LoginPage() {
                 <div className="row mx-4">
                   <div className="col">
                     <button id="BTNENTRAR" type="submit" className="btn btn-primary w-100" disabled={loading}>
-                      {loading ? 'ENTRANDO...' : 'ENTRAR'}
+                      ENTRAR
                     </button>
                   </div>
                 </div>
@@ -160,7 +225,7 @@ export default function LoginPage() {
                 <br />
 
                 <input type="hidden" id="EDTMOBILEPC" value={mobilePC} readOnly />
-                <input type="hidden" id="EDTVAIPROMAIN" value="0" readOnly />
+                <input type="hidden" id="EDTVAIPROMAIN" value={edtVaiProMain} readOnly />
               </form>
             </div>
           </div>
