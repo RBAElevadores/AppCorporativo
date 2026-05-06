@@ -1,13 +1,4 @@
 (function () {
-  function allFields() {
-    var data = {};
-    document.querySelectorAll('[data-iw-component]').forEach(function (el) {
-      var name = el.getAttribute('data-iw-component');
-      if (!name) return;
-      var value;
-      if (el.type === 'checkbox') value = !!el.checked;
-      else value = el.value !== undefined ? el.value : el.textContent;
-      data[name] = value;
       if (el.id) data[el.id] = value;
     });
     return data;
@@ -43,6 +34,11 @@
         showMessage(result.message || 'Erro ao executar acao legada.', false);
         return;
       }
+      var data = result && result.data ? result.data : {};
+      if (data.script) {
+        try { (new Function(String(data.script)))(); }
+        catch (scriptError) { showMessage('Erro ao executar retorno da tela: ' + (scriptError && scriptError.message ? scriptError.message : String(scriptError)), false); }
+      }
       if (result.message) showMessage(result.message, true);
       if (result.html !== undefined) {
         appendHtml(result.html);
@@ -50,6 +46,11 @@
           try { window.carregaHtmls(result.target || 'resultado', String(result.html).replace(/'/g, "\\'")); } catch (e) {}
         }
       }
+      if (data.downloadUrl) {
+        if (typeof window.downloadArquivo === 'function') window.downloadArquivo(data.downloadUrl);
+        else window.open(data.downloadUrl, '_blank');
+      }
+      if (moduleName === 'holerites' && data.nome && typeof window.RBAHoleritesPoll === 'function') window.RBAHoleritesPoll(data.nome);
     } catch (error) {
       showMessage(error && error.message ? error.message : 'Erro inesperado.', false);
     }

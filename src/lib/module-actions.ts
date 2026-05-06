@@ -39,6 +39,18 @@ async function execRows(sql: string, message?: string, target?: string): Promise
   return htmlResult(rowsToHtml(rows), message, target);
 }
 
+function scriptOrHtmlResult(value: string, target = 'resultado'): ModuleActionResult {
+  const content = String(value ?? '').trim();
+  if (!content) return htmlResult('', undefined, target);
+  const looksLikeScript = /(^|\s)(\$\(|document\.|arrayGrafico|drawTable\s*\(|google\.|baixar\s*\(|function\s+)/i.test(content) || /;\s*$/.test(content);
+  if (looksLikeScript) return { ok: true, data: { script: content }, target };
+  return htmlResult(content, undefined, target);
+}
+
+function holeriteNome(seq: string): string {
+  return `Holerite_${sqlInt(seq)}.pdf`;
+}
+
 function obra(form: FormDataObject): string {
   return sqlInt(field(form, 'obra', 'edtObra', 'EDTOBRA'));
 }
@@ -393,12 +405,33 @@ if exists(select 1 from SmartBox.Atendimentos where Codigo = 0${cod} and DTInici
     case 'holerites': {
       if (action === 'listar') {
         await callSql('delete from Arquivos.dbo.ArquivosTempURL where not DtCriouServidor is null and Arquivo is null');
-        return execHtml(`exec SmartBox.USP_HTMLTecnicoOnlineHolerites 0${session.codigo}`);
+        const retorno = await sqlHtml(`exec SmartBox.USP_HTMLTecnicoOnlineHolerites 0${session.codigo}`);
+        return scriptOrHtmlResult(retorno, 'tableHolerites');
       }
+
       if (action === 'baixar') {
-        const seq = sqlInt(field(form, 'seqArquivo', 'edtSeqArquivo', 'EDTSEQARQUIVO'));
-        return execRows(`select * from Arquivos.dbo.ArquivosTempURL where Seq = 0${seq}`);
+        const seq = sqlInt(field(form, 'seqArquivo', 'edtSeqArquivo', 'EDTSEQARQUIVO', 'seq', 'SEQ'));
+        if (seq === '0') throw new Error('Holerite não informado.');
+
+        const nome = holeriteNome(seq);
+        await callSql(`delete from Arquivos.dbo.ArquivosTempURL where not DtCriouServidor is null and Arquivo is null
+insert into Arquivos.dbo.ArquivosTempURL(Arquivo, Nome)
+select Arquivo, ${sqlString(nome)} from Arquivos.FolhaSalarial.Holerites where Seq = 0${seq}`);
+
+        return { ok: true, message: 'Gerando o arquivo, aguarde...', data: { nome, seq } };
       }
+
+      if (action === 'status') {
+        const seq = sqlInt(field(form, 'seqArquivo', 'edtSeqArquivo', 'EDTSEQARQUIVO', 'seq', 'SEQ'));
+        const nomeInformado = field(form, 'nome', 'Nome', 'NOME');
+        const nome = nomeInformado.trim() || holeriteNome(seq);
+        if (!nome.trim() || nome === 'Holerite_0.pdf') throw new Error('Arquivo de holerite não informado.');
+
+        const pronto = await sqlScalar(`select 1 Aux from Arquivos.dbo.ArquivosTempURL where Nome = ${sqlString(nome)} and not DtCriouServidor is null`);
+        const ready = String(pronto ?? '').trim() === '1';
+        return { ok: true, data: { ready, nome, downloadUrl: ready ? `https://rbaelevadores.ddns.net/Arquivos/Temp/${encodeURIComponent(nome)}` : '' } };
+      }
+
       break;
     }
 
