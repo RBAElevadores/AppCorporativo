@@ -40,6 +40,59 @@
 				    bottom: 0; /* Alinha o rodapé à parte inferior */
 				}
 
+    
+        /* RBA padrao visual igual ao Main */
+        html,
+        body {
+            background: #f4f6fa !important;
+            background-color: #f4f6fa !important;
+            min-height: 100% !important;
+            color: #23304d !important;
+        }
+
+        body {
+            font-family: Poppins, Arial, sans-serif !important;
+        }
+
+        nav.navbar {
+            background: rgba(255, 255, 255, 0.97) !important;
+            min-height: 74px !important;
+            height: 74px !important;
+            border-bottom: 1px solid #d8dce7 !important;
+            box-shadow: 0 3px 16px rgba(23, 46, 99, 0.08) !important;
+        }
+
+        #tableNotificacoes,
+        #tableUsuarios {
+            background: #f4f6fa !important;
+            min-height: 80px;
+        }
+
+        #tableNotificacoes .google-visualization-table,
+        #tableNotificacoes .google-visualization-table-table,
+        #tableUsuarios .google-visualization-table,
+        #tableUsuarios .google-visualization-table-table {
+            width: 100% !important;
+            background: #ffffff !important;
+        }
+
+        #tableNotificacoes button,
+        #tableNotificacoes .btn,
+        #tableNotificacoes input[type="button"],
+        #tableUsuarios button,
+        #tableUsuarios .btn,
+        #tableUsuarios input[type="button"] {
+            border-radius: 8px !important;
+            font-weight: 700 !important;
+            color: #172e63 !important;
+        }
+
+        .rba-notificacoes-shell {
+            max-width: 1180px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
     </style>
 
     <script type="text/javascript">
@@ -87,13 +140,22 @@
 			}
 
 			function drawTable() 
-    	{
-				var data = google.visualization.arrayToDataTable(arrayGrafico);
+        {
+            if (!window.google || !google.visualization || !google.visualization.Table) {
+                google.charts.setOnLoadCallback(drawTable);
+                return;
+            }
 
-				var options = {
-								width: '100em',
-								allowHtml: true
-								};
+            var data = google.visualization.arrayToDataTable(arrayGrafico);
+
+            var options = {
+                width: '100%',
+                allowHtml: true
+            };
+
+            table = new google.visualization.Table(document.getElementById(tabela));
+            table.draw(data, options);
+        };
 
 				table = new google.visualization.Table(document.getElementById(tabela));
 				 
@@ -142,6 +204,90 @@
 
         	BTNPESQUISAR.click();
 	    }
+
+
+        function rbaEscapaHtml(texto) {
+            return String(texto || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function rbaPareceScriptLegado(texto) {
+            var conteudo = String(texto || '').trim();
+
+            if (!conteudo) return false;
+
+            return (
+                conteudo.indexOf('arrayGrafico') >= 0 ||
+                conteudo.indexOf('drawTable') >= 0 ||
+                conteudo.indexOf('visualizar(') >= 0 ||
+                conteudo.indexOf('btnFechaModalNotificacao') >= 0 ||
+                conteudo.indexOf('document.getElementById') >= 0
+            );
+        }
+
+        function rbaExecutaScriptLegadoDeElemento(elemento) {
+            if (!elemento) return;
+
+            var texto = String(elemento.textContent || '').trim();
+
+            if (!rbaPareceScriptLegado(texto)) return;
+
+            if (elemento.getAttribute('data-rba-script-executado') === texto) return;
+
+            elemento.setAttribute('data-rba-script-executado', texto);
+
+            try {
+                elemento.innerHTML = '';
+
+                if (window.google && google.charts) {
+                    google.charts.setOnLoadCallback(function() {
+                        new Function(texto)();
+                    });
+                } else {
+                    new Function(texto)();
+                }
+            } catch (e) {
+                elemento.innerHTML =
+                    '<div class="alert alert-danger mb-3">Erro ao montar o retorno legado: ' +
+                    rbaEscapaHtml(e && e.message ? e.message : String(e)) +
+                    '</div><pre class="small bg-light p-2 border rounded">' +
+                    rbaEscapaHtml(texto.substring(0, 2000)) +
+                    '</pre>';
+            }
+        }
+
+        function rbaVerificaScriptsLegados() {
+            rbaExecutaScriptLegadoDeElemento(document.getElementById('tableNotificacoes'));
+            rbaExecutaScriptLegadoDeElemento(document.getElementById('tableUsuarios'));
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            rbaVerificaScriptsLegados();
+
+            var alvos = [
+                document.getElementById('tableNotificacoes'),
+                document.getElementById('tableUsuarios')
+            ].filter(Boolean);
+
+            alvos.forEach(function(alvo) {
+                var observer = new MutationObserver(function() {
+                    setTimeout(rbaVerificaScriptsLegados, 0);
+                });
+
+                observer.observe(alvo, {
+                    childList: true,
+                    subtree: true,
+                    characterData: true
+                });
+            });
+
+            setTimeout(rbaVerificaScriptsLegados, 300);
+            setTimeout(rbaVerificaScriptsLegados, 1000);
+        });
 
 	    function mensagem(titulo,html,tempoFechar,mostraBotaoFechar,mostraSpinner)
 	    {
@@ -218,12 +364,12 @@
 	        <strong> <font color="#14285a"> Notificações </font> </strong>
 	      </div>
 	      <div class="col-2" align="right">
-	        <img src="../wwwroot/RBA.png" class="img-fluid" style="max-width: 50px; max-height: 50px;">
+	        <img src="../wwwroot/RBA-header.png" class="img-fluid" style="max-width: 145px; max-height: 54px; object-fit: contain;">
 	      </div>
 	    </div>
 	</nav>
 
-	<div class="container">
+	<div class="container rba-notificacoes-shell">
 
 		<div class="row mx-2 mt-2 border border-success rounded shadow py-2 px-2" id="enviarNotificacao" style="display: none;">
 			<div class="col" align="center">
