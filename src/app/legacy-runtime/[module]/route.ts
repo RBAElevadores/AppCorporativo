@@ -111,7 +111,7 @@ const ACTION_BUTTONS: Record<string, Record<string, string>> = {
   notificacoes: { BTNPESQUISAR: 'pesquisar', BTNSALVARNOTIFICACAO: 'salvar' },
   'suporte-tecnico': { BTNPESQUISAR: 'pesquisar', BTNCARREGAR: 'carregar' },
   'acoes-especiais': { BTNEXECUTAR: 'executar', BTNGRUPO: 'grupo' },
-  indices: { BTNSCRIPT: 'script' },
+  indices: { BTNSCRIPT: 'executarScript' },
   holerites: { BTNBAIXAR: 'baixar' },
   'abrir-sac': { IWBTNCONFIRMA: 'salvar', IWBTNCANCEL: '__back' }
 };
@@ -120,7 +120,8 @@ const LOAD_ACTION: Record<string, string> = {
   main: 'menu',
   principal: 'meusAtendimentos',
   chat: 'carregar',
-  notificacoes: 'listar'
+  notificacoes: 'listar',
+  indices: 'listar'
 };
 
 const DEFAULT_TARGET: Record<string, string> = {
@@ -285,7 +286,7 @@ function injectCompatibilityScript(html: string, moduleKey: string, moduleTitle:
       }
 
       if (window.google && google.charts && typeof google.charts.load === 'function') {
-        google.charts.load('current', { packages: ['table'] });
+        google.charts.load('current', { packages: ['table', 'corechart'] });
         google.charts.setOnLoadCallback(executeScript);
         return;
       }
