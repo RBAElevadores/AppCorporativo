@@ -95,6 +95,59 @@
             width: 100% !important;
         }
 
+    
+        /* RBA padrao visual igual ao Main */
+        html,
+        body {
+            background: #f4f6fa !important;
+            background-color: #f4f6fa !important;
+            min-height: 100% !important;
+        }
+
+        body {
+            color: #23304d !important;
+        }
+
+        .rba-page-header {
+            background: rgba(255, 255, 255, 0.97) !important;
+            min-height: 74px !important;
+            height: 74px !important;
+            border-bottom: 1px solid #d8dce7 !important;
+            box-shadow: 0 3px 16px rgba(23, 46, 99, 0.08) !important;
+            display: flex !important;
+            align-items: center !important;
+        }
+
+        .rba-page-title {
+            color: #172e63 !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.02em !important;
+        }
+
+        .rba-card {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            padding-top: 28px !important;
+        }
+
+        .rba-holerites-container {
+            background: #f4f6fa !important;
+            max-width: 1180px !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
+            padding-top: 34px !important;
+        }
+
+        #tableHolerites {
+            background: #f4f6fa !important;
+        }
+
+        #tableHolerites table,
+        #tableHolerites .google-visualization-table-table {
+            background: #ffffff !important;
+        }
+
     </style>
 
     <script type="text/javascript">
@@ -269,7 +322,7 @@
                 }
             }
 
-            mensagem("Holerite", "Houve algum problema! Tente novamente!", 0, 1, 0);
+            mensagem("Holerite", "O arquivo temporário foi solicitado, mas ainda não ficou disponível para download. Tente novamente em alguns segundos.", 0, 1, 0);
         }
 
         window.RBAHoleritesPoll = RBAHoleritesPoll;
@@ -355,7 +408,7 @@
 	    </div>
 	</nav>
 
-	<div class="container py-4 rba-holerites-container">
+	<div class="container-fluid py-4 rba-holerites-container">
 <div id="tableHolerites"></div>
 
 	</div>
