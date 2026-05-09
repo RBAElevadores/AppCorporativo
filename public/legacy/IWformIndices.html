@@ -513,6 +513,175 @@
 
 	    }
 
+	    function rbaDecodeJsString(raw)
+	    {
+	    	var out = '';
+	    	var slash = String.fromCharCode(92);
+
+	    	for (var i = 0; i < raw.length; i++)
+	    	{
+	    		var ch = raw.charAt(i);
+
+	    		if (ch !== slash)
+	    		{
+	    			out += ch;
+	    			continue;
+	    		}
+
+	    		var next = raw.charAt(i + 1);
+	    		i++;
+
+	    		if (next === 'n') out += String.fromCharCode(10);
+	    		else if (next === 'r') out += String.fromCharCode(13);
+	    		else if (next === 't') out += String.fromCharCode(9);
+	    		else if (next === slash) out += slash;
+	    		else if (next === "'") out += "'";
+	    		else if (next === '"') out += '"';
+	    		else out += next;
+	    	}
+
+	    	return out;
+	    }
+
+	    function rbaEhEspaco(ch)
+	    {
+	    	return ch === ' ' || ch === String.fromCharCode(10) || ch === String.fromCharCode(13) || ch === String.fromCharCode(9);
+	    }
+
+	    function rbaExtrairHtmlJQuery(origem, seletor)
+	    {
+	    	var texto = String(origem || '');
+	    	var pos = texto.indexOf(seletor);
+
+	    	while (pos >= 0)
+	    	{
+	    		var htmlPos = texto.indexOf('.html', pos);
+
+	    		if (htmlPos < 0)
+	    		{
+	    			return null;
+	    		}
+
+	    		var abre = texto.indexOf('(', htmlPos);
+
+	    		if (abre < 0)
+	    		{
+	    			return null;
+	    		}
+
+	    		var i = abre + 1;
+
+	    		while (i < texto.length && rbaEhEspaco(texto.charAt(i)))
+	    		{
+	    			i++;
+	    		}
+
+	    		var aspas = texto.charAt(i);
+
+	    		if (aspas !== "'" && aspas !== '"')
+	    		{
+	    			pos = texto.indexOf(seletor, pos + seletor.length);
+	    			continue;
+	    		}
+
+	    		i++;
+
+	    		var raw = '';
+	    		var slash = String.fromCharCode(92);
+
+	    		for (; i < texto.length; i++)
+	    		{
+	    			var ch = texto.charAt(i);
+
+	    			if (ch === slash)
+	    			{
+	    				raw += ch;
+
+	    				if (i + 1 < texto.length)
+	    				{
+	    					raw += texto.charAt(i + 1);
+	    					i++;
+	    				}
+
+	    				continue;
+	    			}
+
+	    			if (ch === aspas)
+	    			{
+	    				return rbaDecodeJsString(raw);
+	    			}
+
+	    			raw += ch;
+	    		}
+
+	    		return null;
+	    	}
+
+	    	return null;
+	    }
+
+	    function rbaFecharModalAguarde()
+	    {
+	    	try
+	    	{
+	    		if (document.getElementById('btnFechaModalMensagem'))
+	    		{
+	    			btnFechaModalMensagem.click();
+	    		}
+	    	}
+	    	catch(e) {}
+	    }
+
+	    function rbaAbrirModalIndice(titulo, corpo)
+	    {
+	    	rbaFecharModalAguarde();
+
+	    	document.getElementById('txtTituloIndice').innerHTML = titulo || 'Índice / Análise';
+	    	document.getElementById('corpoModalIndice').innerHTML = corpo || '';
+
+	    	btnModalIndice.click();
+	    }
+
+	    function rbaRenderizarRetornoIndice(retorno)
+	    {
+	    	var texto = String(retorno || '').trim();
+
+	    	if (!texto)
+	    	{
+	    		rbaFecharModalAguarde();
+	    		mensagem("Índice / Análise", "Consulta executada sem retorno.", 0, 1, 0);
+	    		return;
+	    	}
+
+	    	var titulo = rbaExtrairHtmlJQuery(texto, '#txtTituloIndice') || 'Índice / Análise';
+	    	var corpo = rbaExtrairHtmlJQuery(texto, '#corpoModalIndice');
+
+	    	if (corpo !== null)
+	    	{
+	    		rbaAbrirModalIndice(titulo, corpo);
+	    		return;
+	    	}
+
+	    	if (texto.indexOf('<html') >= 0 || texto.indexOf('<body') >= 0 || texto.indexOf('<div') >= 0 || texto.indexOf('<table') >= 0)
+	    	{
+	    		rbaFecharModalAguarde();
+	    		abrirHtmlCompletoNoModalIndice(texto, titulo);
+	    		return;
+	    	}
+
+	    	try
+	    	{
+	    		rbaFecharModalAguarde();
+	    		new Function(texto)();
+	    		return;
+	    	}
+	    	catch(e)
+	    	{
+	    		rbaFecharModalAguarde();
+	    		mensagem("Erro", "Não foi possível montar o índice: " + (e && e.message ? e.message : String(e)), 0, 1, 0);
+	    	}
+	    }
+
 	    function rodaScript(txt)
 	    {
 	    	mensagem("Aguarde","Carregando os dados, aguarde...",0,0,1);
@@ -520,7 +689,7 @@
 	    	document.getElementById('EDTSCRIPT').value = txt;
 	        AddChangedControl('EDTSCRIPT');
 
-	        fetch('/api/modules/indices/executarScript', {
+	        fetch('/api/indices/executar', {
 	        	method: 'POST',
 	        	headers: { 'Content-Type': 'application/json' },
 	        	body: JSON.stringify({
@@ -538,22 +707,14 @@
 	        	});
 	        })
 	        .then(function(result) {
-	        	var html = result.html || result.message || '';
-
-	        	if (document.getElementById('btnFechaModalMensagem')) {
-	        		try { btnFechaModalMensagem.click(); } catch(e) {}
-	        	}
-
-	        	if (html) {
-	        		abrirHtmlCompletoNoModalIndice(html, 'Índice / Análise');
-	        	} else {
-	        		mensagem("Índice / Análise", "Consulta executada sem retorno.", 0, 1, 0);
-	        	}
+	        	rbaRenderizarRetornoIndice(result.html || result.retorno || result.message || '');
 	        })
 	        .catch(function(error) {
+	        	rbaFecharModalAguarde();
 	        	mensagem("Erro", error && error.message ? error.message : String(error), 0, 1, 0);
 	        });
 	    }
+
 
 	    function limparModalIndice() 
 	    {
