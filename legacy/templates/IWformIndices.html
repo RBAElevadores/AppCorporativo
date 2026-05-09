@@ -548,6 +548,58 @@
 	    	return ch === ' ' || ch === String.fromCharCode(10) || ch === String.fromCharCode(13) || ch === String.fromCharCode(9);
 	    }
 
+	    function rbaLerStringJs(texto, indiceInicial)
+	    {
+	    	var i = indiceInicial;
+
+	    	while (i < texto.length && rbaEhEspaco(texto.charAt(i)))
+	    	{
+	    		i++;
+	    	}
+
+	    	var aspas = texto.charAt(i);
+
+	    	if (aspas !== "'" && aspas !== '"')
+	    	{
+	    		return null;
+	    	}
+
+	    	i++;
+
+	    	var raw = '';
+	    	var slash = String.fromCharCode(92);
+
+	    	for (; i < texto.length; i++)
+	    	{
+	    		var ch = texto.charAt(i);
+
+	    		if (ch === slash)
+	    		{
+	    			raw += ch;
+
+	    			if (i + 1 < texto.length)
+	    			{
+	    				raw += texto.charAt(i + 1);
+	    				i++;
+	    			}
+
+	    			continue;
+	    		}
+
+	    		if (ch === aspas)
+	    		{
+	    			return {
+	    				value: rbaDecodeJsString(raw),
+	    				nextIndex: i + 1
+	    			};
+	    		}
+
+	    		raw += ch;
+	    	}
+
+	    	return null;
+	    }
+
 	    function rbaExtrairHtmlJQuery(origem, seletor)
 	    {
 	    	var texto = String(origem || '');
@@ -569,55 +621,82 @@
 	    			return null;
 	    		}
 
-	    		var i = abre + 1;
+	    		var resultado = rbaLerStringJs(texto, abre + 1);
 
-	    		while (i < texto.length && rbaEhEspaco(texto.charAt(i)))
+	    		if (resultado)
 	    		{
-	    			i++;
+	    			return resultado.value;
 	    		}
 
-	    		var aspas = texto.charAt(i);
-
-	    		if (aspas !== "'" && aspas !== '"')
-	    		{
-	    			pos = texto.indexOf(seletor, pos + seletor.length);
-	    			continue;
-	    		}
-
-	    		i++;
-
-	    		var raw = '';
-	    		var slash = String.fromCharCode(92);
-
-	    		for (; i < texto.length; i++)
-	    		{
-	    			var ch = texto.charAt(i);
-
-	    			if (ch === slash)
-	    			{
-	    				raw += ch;
-
-	    				if (i + 1 < texto.length)
-	    				{
-	    					raw += texto.charAt(i + 1);
-	    					i++;
-	    				}
-
-	    				continue;
-	    			}
-
-	    			if (ch === aspas)
-	    			{
-	    				return rbaDecodeJsString(raw);
-	    			}
-
-	    			raw += ch;
-	    		}
-
-	    		return null;
+	    		pos = texto.indexOf(seletor, pos + seletor.length);
 	    	}
 
 	    	return null;
+	    }
+
+	    function rbaExtrairAbrirHtmlCompleto(origem)
+	    {
+	    	var texto = String(origem || '').trim();
+	    	var nomeFuncao = 'abrirHtmlCompletoNoModalIndice';
+	    	var pos = texto.indexOf(nomeFuncao);
+
+	    	if (pos < 0)
+	    	{
+	    		return null;
+	    	}
+
+	    	var abre = texto.indexOf('(', pos + nomeFuncao.length);
+
+	    	if (abre < 0)
+	    	{
+	    		return null;
+	    	}
+
+	    	var primeiro = rbaLerStringJs(texto, abre + 1);
+
+	    	if (!primeiro)
+	    	{
+	    		return null;
+	    	}
+
+	    	var i = primeiro.nextIndex;
+
+	    	while (i < texto.length && rbaEhEspaco(texto.charAt(i)))
+	    	{
+	    		i++;
+	    	}
+
+	    	var titulo = 'Índice / Análise';
+
+	    	if (texto.charAt(i) === ',')
+	    	{
+	    		var segundo = rbaLerStringJs(texto, i + 1);
+
+	    		if (segundo && segundo.value)
+	    		{
+	    			titulo = segundo.value;
+	    		}
+	    	}
+
+	    	return {
+	    		html: primeiro.value,
+	    		titulo: titulo
+	    	};
+	    }
+
+	    function rbaNormalizarPossivelHtmlEscapado(texto)
+	    {
+	    	var valor = String(texto || '');
+
+	    	// Alguns retornos chegam como string JS já decodificada parcialmente.
+	    	// Se ainda houver sequências literais 
+ ou 	, converte para o iframe renderizar melhor.
+	    	if (valor.indexOf('\n') >= 0 || valor.indexOf('\t') >= 0 || valor.indexOf('\"') >= 0)
+	    	{
+	    		valor = rbaDecodeJsString(valor);
+	    	}
+
+	    	return valor;
 	    }
 
 	    function rbaFecharModalAguarde()
@@ -653,22 +732,38 @@
 	    		return;
 	    	}
 
+	    	// Forma 1: retorno legado chama abrirHtmlCompletoNoModalIndice("html completo", "titulo").
+	    	var chamadaHtmlCompleto = rbaExtrairAbrirHtmlCompleto(texto);
+
+	    	if (chamadaHtmlCompleto)
+	    	{
+	    		rbaFecharModalAguarde();
+	    		abrirHtmlCompletoNoModalIndice(
+	    			rbaNormalizarPossivelHtmlEscapado(chamadaHtmlCompleto.html),
+	    			chamadaHtmlCompleto.titulo || 'Índice / Análise'
+	    		);
+	    		return;
+	    	}
+
+	    	// Forma 2: retorno legado monta diretamente o titulo e o corpo do modal via jQuery.
 	    	var titulo = rbaExtrairHtmlJQuery(texto, '#txtTituloIndice') || 'Índice / Análise';
 	    	var corpo = rbaExtrairHtmlJQuery(texto, '#corpoModalIndice');
 
 	    	if (corpo !== null)
 	    	{
-	    		rbaAbrirModalIndice(titulo, corpo);
+	    		rbaAbrirModalIndice(titulo, rbaNormalizarPossivelHtmlEscapado(corpo));
 	    		return;
 	    	}
 
-	    	if (texto.indexOf('<html') >= 0 || texto.indexOf('<body') >= 0 || texto.indexOf('<div') >= 0 || texto.indexOf('<table') >= 0)
+	    	// Forma 3: retorno já é o HTML completo ou parcial.
+	    	if (texto.indexOf('<html') >= 0 || texto.indexOf('<body') >= 0 || texto.indexOf('<div') >= 0 || texto.indexOf('<table') >= 0 || texto.indexOf('<script') >= 0)
 	    	{
 	    		rbaFecharModalAguarde();
-	    		abrirHtmlCompletoNoModalIndice(texto, titulo);
+	    		abrirHtmlCompletoNoModalIndice(rbaNormalizarPossivelHtmlEscapado(texto), titulo);
 	    		return;
 	    	}
 
+	    	// Forma 4: fallback, executa script legado.
 	    	try
 	    	{
 	    		rbaFecharModalAguarde();
