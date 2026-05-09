@@ -246,7 +246,21 @@ function injectCompatibilityScript(html: string, moduleKey: string, moduleTitle:
     );
   }
 
+
+  function ensureLegacyGlobals(){
+    const noopButton = { click: function(){} };
+
+    window.btnFechaModalToken = window.btnFechaModalToken || byId('btnFechaModalToken') || noopButton;
+    window.btnModalToken = window.btnModalToken || byId('btnModalToken') || noopButton;
+    window.btnFechaModalMensagem = window.btnFechaModalMensagem || byId('btnFechaModalMensagem') || noopButton;
+    window.btnModalMensagem = window.btnModalMensagem || byId('btnModalMensagem') || noopButton;
+
+    window.btnFechaModalNotificacao = window.btnFechaModalNotificacao || byId('btnFechaModalNotificacao') || noopButton;
+    window.btnModalNotificacao = window.btnModalNotificacao || byId('btnModalNotificacao') || noopButton;
+  }
+
   function runLegacyScript(value){
+    ensureLegacyGlobals();
     const scriptText = String(value || '').trim();
     if (!scriptText) return;
 
