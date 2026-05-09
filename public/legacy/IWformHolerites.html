@@ -118,12 +118,6 @@
             align-items: center !important;
         }
 
-        .rba-page-title {
-            color: #172e63 !important;
-            font-weight: 700 !important;
-            letter-spacing: 0.02em !important;
-        }
-
         .rba-card {
             background: transparent !important;
             border: none !important;
@@ -137,15 +131,6 @@
             margin-left: auto !important;
             margin-right: auto !important;
             padding-top: 34px !important;
-        }
-
-        #tableHolerites {
-            background: #f4f6fa !important;
-        }
-
-        #tableHolerites table,
-        #tableHolerites .google-visualization-table-table {
-            background: #ffffff !important;
         }
 
     </style>
@@ -297,9 +282,9 @@
 
         async function RBAHoleritesPoll(nome)
         {
-            for (let tentativa = 0; tentativa < 12; tentativa++)
+            for (let tentativa = 0; tentativa < 45; tentativa++)
             {
-                await delay(tentativa === 0 ? 600 : 1200);
+                await delay(tentativa === 0 ? 800 : 1500);
 
                 const response = await fetch('/api/holerites/status', {
                     method: 'POST',
@@ -322,7 +307,7 @@
                 }
             }
 
-            mensagem("Holerite", "O arquivo temporário foi solicitado, mas ainda não ficou disponível para download. Tente novamente em alguns segundos.", 0, 1, 0);
+            mensagem("Holerite", "O pedido foi registrado, mas o PDF ainda não ficou disponível. Aguarde alguns segundos e clique em BAIXAR novamente.", 0, 1, 0);
         }
 
         window.RBAHoleritesPoll = RBAHoleritesPoll;

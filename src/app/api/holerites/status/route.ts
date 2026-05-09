@@ -49,6 +49,7 @@ export async function POST(request: NextRequest) {
 
     const rows = await callSql(`
 select top 1
+       Seq,
        Nome,
        iif(DtCriouServidor is null, 0, 1) Ready,
        convert(varchar(19), DtCriouServidor, 120) DtCriouServidor
@@ -68,6 +69,7 @@ order by Seq desc
         rowExists,
         ready,
         nome,
+        pedidoSeq: sqlTextFromField(row, ['Seq', 'seq'], ''),
         dtCriouServidor: sqlTextFromField(row, ['DtCriouServidor', 'dtCriouServidor'], ''),
         downloadUrl: ready ? `https://rbaelevadores.ddns.net/Arquivos/Temp/${encodeURIComponent(nome)}` : ''
       }
