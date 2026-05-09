@@ -687,11 +687,9 @@
 	    function rbaNormalizarPossivelHtmlEscapado(texto)
 	    {
 	    	var valor = String(texto || '');
+	    	var slash = String.fromCharCode(92);
 
-	    	// Alguns retornos chegam como string JS já decodificada parcialmente.
-	    	// Se ainda houver sequências literais 
- ou 	, converte para o iframe renderizar melhor.
-	    	if (valor.indexOf('\n') >= 0 || valor.indexOf('\t') >= 0 || valor.indexOf('\"') >= 0)
+	    	if (valor.indexOf(slash + 'n') >= 0 || valor.indexOf(slash + 't') >= 0 || valor.indexOf(slash + '"') >= 0)
 	    	{
 	    		valor = rbaDecodeJsString(valor);
 	    	}
@@ -732,7 +730,6 @@
 	    		return;
 	    	}
 
-	    	// Forma 1: retorno legado chama abrirHtmlCompletoNoModalIndice("html completo", "titulo").
 	    	var chamadaHtmlCompleto = rbaExtrairAbrirHtmlCompleto(texto);
 
 	    	if (chamadaHtmlCompleto)
@@ -745,7 +742,6 @@
 	    		return;
 	    	}
 
-	    	// Forma 2: retorno legado monta diretamente o titulo e o corpo do modal via jQuery.
 	    	var titulo = rbaExtrairHtmlJQuery(texto, '#txtTituloIndice') || 'Índice / Análise';
 	    	var corpo = rbaExtrairHtmlJQuery(texto, '#corpoModalIndice');
 
@@ -755,7 +751,6 @@
 	    		return;
 	    	}
 
-	    	// Forma 3: retorno já é o HTML completo ou parcial.
 	    	if (texto.indexOf('<html') >= 0 || texto.indexOf('<body') >= 0 || texto.indexOf('<div') >= 0 || texto.indexOf('<table') >= 0 || texto.indexOf('<script') >= 0)
 	    	{
 	    		rbaFecharModalAguarde();
@@ -763,7 +758,6 @@
 	    		return;
 	    	}
 
-	    	// Forma 4: fallback, executa script legado.
 	    	try
 	    	{
 	    		rbaFecharModalAguarde();
