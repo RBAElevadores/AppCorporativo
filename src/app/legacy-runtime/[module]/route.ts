@@ -233,6 +233,22 @@ function injectCompatibilityScript(html: string, moduleKey: string, moduleTitle:
   }
 
 
+  function startsWithLegacyPrefix(text){
+    const t = String(text || '').trim();
+
+    return (
+      t.startsWith('tabela =') ||
+      t.startsWith('tabela=') ||
+      t.startsWith('arrayGrafico =') ||
+      t.startsWith('arrayGrafico=') ||
+      t.startsWith('function ') ||
+      t.startsWith("$('#corpo').html") ||
+      t.startsWith('$("#corpo").html') ||
+      t.startsWith("$( '#corpo' ).html") ||
+      t.startsWith('$( "#corpo" ).html')
+    );
+  }
+
   function looksLikeLegacyScript(value){
     const text = String(value || '').trim();
     if (!text) return false;
@@ -246,9 +262,9 @@ function injectCompatibilityScript(html: string, moduleKey: string, moduleTitle:
       text.indexOf('rodaScript(') >= 0 ||
       text.indexOf("$('#corpo').html") >= 0 ||
       text.indexOf('$("#corpo").html') >= 0 ||
-      text.indexOf('$("#corpo" ).html') >= 0 ||
       text.indexOf("$( '#corpo' ).html") >= 0 ||
-      /^\s*(tabela\s*=|arrayGrafico\s*=|function\s+|\$\s*\(\s*['"]#corpo['"]\s*\)\s*\.html\s*\()/.test(text)
+      text.indexOf('$( "#corpo" ).html') >= 0 ||
+      startsWithLegacyPrefix(text)
     );
   }
 
@@ -293,19 +309,36 @@ function injectCompatibilityScript(html: string, moduleKey: string, moduleTitle:
 
   function extractLegacyHtmlAssignment(scriptText){
     const text = String(scriptText || '');
-    if (text.indexOf('#corpo') < 0 || text.indexOf('.html') < 0) return null;
+
+    if (text.indexOf('#corpo') < 0 || text.indexOf('.html') < 0) {
+      return null;
+    }
 
     const htmlIndex = text.indexOf('.html');
     const openParen = text.indexOf('(', htmlIndex);
-    if (openParen < 0) return null;
+
+    if (openParen < 0) {
+      return null;
+    }
 
     let i = openParen + 1;
-    while (i < text.length && /\s/.test(text.charAt(i))) i++;
+
+    while (i < text.length) {
+      const c = text.charAt(i);
+      if (c !== ' ' && c !== '\n' && c !== '\r' && c !== '\t') {
+        break;
+      }
+      i++;
+    }
 
     const quote = text.charAt(i);
-    if (quote !== "'" && quote !== '"') return null;
+
+    if (quote !== "'" && quote !== '"') {
+      return null;
+    }
 
     i++;
+
     let raw = '';
 
     for (; i < text.length; i++) {
@@ -313,10 +346,12 @@ function injectCompatibilityScript(html: string, moduleKey: string, moduleTitle:
 
       if (ch === '\\') {
         raw += ch;
+
         if (i + 1 < text.length) {
           raw += text.charAt(i + 1);
           i++;
         }
+
         continue;
       }
 
@@ -332,10 +367,16 @@ function injectCompatibilityScript(html: string, moduleKey: string, moduleTitle:
 
   function applyLegacyHtmlAssignment(scriptText){
     const html = extractLegacyHtmlAssignment(scriptText);
-    if (html === null) return false;
+
+    if (html === null) {
+      return false;
+    }
 
     const target = byId('corpo') || byId('resultado') || byId('ResultadoMigracao');
-    if (!target) return false;
+
+    if (!target) {
+      return false;
+    }
 
     target.innerHTML = html;
 
@@ -348,8 +389,12 @@ function injectCompatibilityScript(html: string, moduleKey: string, moduleTitle:
 
   function runLegacyScript(value){
     ensureLegacyGlobals();
+
     const scriptText = String(value || '').trim();
-    if (!scriptText) return;
+
+    if (!scriptText) {
+      return;
+    }
 
     function executeScript(){
       new Function(scriptText)();
