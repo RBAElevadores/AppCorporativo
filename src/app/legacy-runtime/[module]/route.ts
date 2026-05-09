@@ -243,7 +243,12 @@ function injectCompatibilityScript(html: string, moduleKey: string, moduleTitle:
       text.indexOf('visualizar(') >= 0 ||
       text.indexOf('document.getElementById') >= 0 ||
       text.indexOf('btnFechaModal') >= 0 ||
-      /^\s*(tabela\s*=|arrayGrafico\s*=|function\s+)/.test(text)
+      text.indexOf('rodaScript(') >= 0 ||
+      text.indexOf("$('#corpo').html") >= 0 ||
+      text.indexOf('$("#corpo").html') >= 0 ||
+      text.indexOf('$("#corpo" ).html') >= 0 ||
+      text.indexOf("$( '#corpo' ).html") >= 0 ||
+      /^\s*(tabela\s*=|arrayGrafico\s*=|function\s+|\$\s*\(\s*['"]#corpo['"]\s*\)\s*\.html\s*\()/.test(text)
     );
   }
 
@@ -260,6 +265,87 @@ function injectCompatibilityScript(html: string, moduleKey: string, moduleTitle:
     window.btnModalNotificacao = window.btnModalNotificacao || byId('btnModalNotificacao') || noopButton;
   }
 
+  function decodeBasicJsString(raw){
+    let out = '';
+
+    for (let i = 0; i < raw.length; i++) {
+      const ch = raw.charAt(i);
+
+      if (ch !== '\\') {
+        out += ch;
+        continue;
+      }
+
+      const next = raw.charAt(i + 1);
+      i++;
+
+      if (next === 'n') out += '\n';
+      else if (next === 'r') out += '\r';
+      else if (next === 't') out += '\t';
+      else if (next === '\\') out += '\\';
+      else if (next === "'") out += "'";
+      else if (next === '"') out += '"';
+      else out += next;
+    }
+
+    return out;
+  }
+
+  function extractLegacyHtmlAssignment(scriptText){
+    const text = String(scriptText || '');
+    if (text.indexOf('#corpo') < 0 || text.indexOf('.html') < 0) return null;
+
+    const htmlIndex = text.indexOf('.html');
+    const openParen = text.indexOf('(', htmlIndex);
+    if (openParen < 0) return null;
+
+    let i = openParen + 1;
+    while (i < text.length && /\s/.test(text.charAt(i))) i++;
+
+    const quote = text.charAt(i);
+    if (quote !== "'" && quote !== '"') return null;
+
+    i++;
+    let raw = '';
+
+    for (; i < text.length; i++) {
+      const ch = text.charAt(i);
+
+      if (ch === '\\') {
+        raw += ch;
+        if (i + 1 < text.length) {
+          raw += text.charAt(i + 1);
+          i++;
+        }
+        continue;
+      }
+
+      if (ch === quote) {
+        return decodeBasicJsString(raw);
+      }
+
+      raw += ch;
+    }
+
+    return null;
+  }
+
+  function applyLegacyHtmlAssignment(scriptText){
+    const html = extractLegacyHtmlAssignment(scriptText);
+    if (html === null) return false;
+
+    const target = byId('corpo') || byId('resultado') || byId('ResultadoMigracao');
+    if (!target) return false;
+
+    target.innerHTML = html;
+
+    if (typeof window.RBAMainAfterRender === 'function') {
+      try { window.RBAMainAfterRender(); } catch(e) {}
+    }
+
+    return true;
+  }
+
   function runLegacyScript(value){
     ensureLegacyGlobals();
     const scriptText = String(value || '').trim();
@@ -270,6 +356,10 @@ function injectCompatibilityScript(html: string, moduleKey: string, moduleTitle:
     }
 
     try {
+      if (applyLegacyHtmlAssignment(scriptText)) {
+        return;
+      }
+
       const precisaGoogleCharts =
         scriptText.indexOf('drawTable') >= 0 ||
         scriptText.indexOf('arrayGrafico') >= 0 ||
@@ -280,7 +370,7 @@ function injectCompatibilityScript(html: string, moduleKey: string, moduleTitle:
         return;
       }
 
-      if (window.google && google.visualization && google.visualization.Table) {
+      if (window.google && google.visualization && (google.visualization.Table || google.visualization.ComboChart)) {
         executeScript();
         return;
       }
@@ -293,6 +383,10 @@ function injectCompatibilityScript(html: string, moduleKey: string, moduleTitle:
 
       executeScript();
     } catch (scriptError) {
+      if (applyLegacyHtmlAssignment(scriptText)) {
+        return;
+      }
+
       throw new Error(
         'Erro ao montar retorno legado: ' +
         (scriptError && scriptError.message ? scriptError.message : String(scriptError))
