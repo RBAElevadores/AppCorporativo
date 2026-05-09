@@ -471,6 +471,13 @@
 		}
 
 		function modalFechar(modal) {
+			try {
+				var modalEl = document.getElementById(modal);
+				if (modalEl && document.activeElement && modalEl.contains(document.activeElement)) {
+					document.activeElement.blur();
+				}
+			} catch (e) {}
+
 			modalAberto = modalAberto.replace("|" + modal, "");
 
 			abrir = modalAberto.substring(0, modalAberto.indexOf("|"));
@@ -669,7 +676,78 @@
 			alert("remover");
 		}
 
+		function rbaOpenArquivoVistoria(url) {
+			if (!url) {
+				return;
+			}
+
+			window.open(url, '_blank', 'noopener');
+		}
+
+		function rbaExtraiArquivoVistoriaUrl(value) {
+			var text = String(value || '').replace(/&amp;/g, '&');
+			var match = text.match(/\/api\/vistorias\/arquivo\/\d+[^'"\s)>]*/i);
+
+			return match ? match[0] : '';
+		}
+
+		function rbaNormalizaCliquesArquivosFotos() {
+			var root = document.getElementById('corpoArquivosFotos');
+
+			if (!root) {
+				return;
+			}
+
+			root.querySelectorAll('a').forEach(function(anchor) {
+				var image = anchor.querySelector('img');
+				var url = rbaExtraiArquivoVistoriaUrl(anchor.getAttribute('href')) ||
+					rbaExtraiArquivoVistoriaUrl(anchor.getAttribute('onclick')) ||
+					(image ? (image.currentSrc || image.src) : '');
+
+				if (!url || url.indexOf('/api/vistorias/arquivo/') === -1) {
+					return;
+				}
+
+				anchor.setAttribute('href', url);
+				anchor.setAttribute('target', '_blank');
+				anchor.setAttribute('rel', 'noopener');
+				anchor.removeAttribute('onclick');
+
+				if (anchor.dataset.rbaArquivoClick !== '1') {
+					anchor.dataset.rbaArquivoClick = '1';
+					anchor.addEventListener('click', function(ev) {
+						ev.preventDefault();
+						rbaOpenArquivoVistoria(url);
+					});
+				}
+			});
+
+			root.querySelectorAll('img').forEach(function(image) {
+				var url = image.currentSrc || image.src || rbaExtraiArquivoVistoriaUrl(image.getAttribute('onclick'));
+
+				if (!url || url.indexOf('/api/vistorias/arquivo/') === -1) {
+					return;
+				}
+
+				image.style.cursor = 'pointer';
+				image.removeAttribute('onclick');
+
+				if (image.dataset.rbaArquivoClick !== '1') {
+					image.dataset.rbaArquivoClick = '1';
+					image.addEventListener('click', function(ev) {
+						ev.preventDefault();
+						ev.stopPropagation();
+						rbaOpenArquivoVistoria(url);
+					});
+				}
+			});
+		}
+
 		window.RBAFixVistoriasDom = function(targetId) {
+			if (targetId === 'corpoArquivosFotos') {
+				rbaNormalizaCliquesArquivosFotos();
+			}
+
 			if (targetId === 'TableVistorias') {
 				try {
 					if (window.location.hash) {
