@@ -88,11 +88,66 @@ function endpointErrorFromParsed(parsed: unknown): string | null {
   return String(value);
 }
 
-export async function callSql(script: string): Promise<SqlRow[]> {
-  const endpoint = process.env.RBA_SQL_ENDPOINT;
-  if (!endpoint) {
+
+function normalizedFirstSqlToken(script: string): string {
+  let text = String(script ?? '');
+
+  // Remove comentários iniciais simples para identificar o primeiro comando real.
+  text = text.replace(/^\s*(--[^\r\n]*(?:\r?\n|$)\s*)+/g, '');
+  text = text.replace(/^\s*(\/\*[\s\S]*?\*\/\s*)+/g, '');
+
+  const match = text.trim().match(/^([a-zA-Z]+)/);
+  return match ? match[1].toLowerCase() : '';
+}
+
+function shouldUseExecuteSqlEndpoint(script: string): boolean {
+  const firstToken = normalizedFirstSqlToken(script);
+
+  if (!firstToken) return false;
+
+  // Conforme combinado:
+  // - SELECT direto continua no /retornasqljson.
+  // - EXEC de procedures continua no /retornasqljson.
+  // - O restante, especialmente INSERT/UPDATE/DELETE, vai para /executasql.
+  if (firstToken === 'select' || firstToken === 'exec' || firstToken === 'execute' || firstToken === 'with') {
+    return false;
+  }
+
+  return true;
+}
+
+function resolveSqlEndpoint(script: string): string {
+  const readEndpoint = process.env.RBA_SQL_ENDPOINT;
+
+  if (!readEndpoint) {
     throw new Error('Variável RBA_SQL_ENDPOINT não configurada no ambiente.');
   }
+
+  if (!shouldUseExecuteSqlEndpoint(script)) {
+    return readEndpoint;
+  }
+
+  const explicitExecuteEndpoint =
+    process.env.RBA_EXEC_SQL_ENDPOINT ||
+    process.env.RBA_SQL_EXEC_ENDPOINT;
+
+  if (explicitExecuteEndpoint) {
+    return explicitExecuteEndpoint;
+  }
+
+  // Padrão do ambiente atual:
+  // https://iam.rbaelevadores.com.br/retornasqljson
+  // vira:
+  // https://iam.rbaelevadores.com.br/executasql
+  if (/\/retornasqljson\/?$/i.test(readEndpoint)) {
+    return readEndpoint.replace(/\/retornasqljson\/?$/i, '/executasql');
+  }
+
+  return readEndpoint.replace(/\/+$/, '') + '/executasql';
+}
+
+export async function callSql(script: string): Promise<SqlRow[]> {
+  const endpoint = resolveSqlEndpoint(script);
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json'
