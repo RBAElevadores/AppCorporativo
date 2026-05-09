@@ -111,7 +111,7 @@ const ACTION_BUTTONS: Record<string, Record<string, string>> = {
     BTNLIGARONLINE: 'ligarOnline', BTNDESLIGARONLINE: 'desligarOnline'
   },
   'entrega-tecnica': { BTNPESQUISAR: 'pesquisar', BTNCARREGAR: 'carregar', BTNACESSARENTREGATECNICA: 'acessarEntregaTecnica', BTNESTRUTURAENTREGATECNICA: 'estruturaEntregaTecnica' },
-  vistorias: { BTNPESQUISAR: 'pesquisar', BTNCARREGAR: 'carregar', BTNCARREGARFICHA: 'carregarFicha', BTNCARREGARVISTORIA: 'carregar', BTNARQUIVOSFOTOS: 'arquivosFotos', BTNENVIO: 'envio', BTNSOLICITAADITIVO: 'solicitaAditivo', BTNLANCAFOLLOWUP: 'lancaFollowUp' },
+  vistorias: { BTNPESQUISAR: 'pesquisar', BTNCARREGAR: 'carregarObra', BTNCARREGARFICHA: 'carregarFicha', BTNCARREGARVISTORIA: 'carregar', BTNARQUIVOSFOTOS: 'arquivosFotos', BTNENVIO: 'envio', BTNSOLICITAADITIVO: 'solicitaAditivo', BTNLANCAFOLLOWUP: 'lancaFollowUp' },
   os: { BTNPESQUISAR: 'pesquisar', BTNOS: 'carregar', BTNAUTORIZAR: 'autorizar' },
   notificacoes: { BTNPESQUISAR: 'pesquisar', BTNSALVARNOTIFICACAO: 'salvar' },
   'suporte-tecnico': { BTNPESQUISAR: 'pesquisar', BTNCARREGAR: 'carregar' },

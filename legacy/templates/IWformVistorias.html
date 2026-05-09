@@ -202,6 +202,20 @@
 			max-width: 660px;
 		}
 
+
+		.rba-hero-search-only {
+			display: flex !important;
+			justify-content: center !important;
+			align-items: center !important;
+			min-height: calc(100vh - 220px);
+			padding: 72px 0 32px !important;
+			text-align: center;
+		}
+
+		.rba-hero-search-only .rba-primary-action {
+			min-width: 280px;
+		}
+
 		.rba-primary-action,
 		.rba-secondary-action,
 		.rba-success-action,
@@ -384,6 +398,17 @@
 				width: 100%;
 			}
 
+
+			.rba-hero-search-only {
+				min-height: calc(100vh - 180px);
+				padding-top: 44px !important;
+			}
+
+			.rba-hero-search-only .rba-primary-action {
+				width: min(100%, 320px) !important;
+				min-width: 0;
+			}
+
 			.rba-header-logo-img {
 				max-width: 118px !important;
 			}
@@ -514,6 +539,11 @@
 		function selecionar(obra) {
 			document.getElementById('EDTOBRA').value = obra;
 			AddChangedControl('EDTOBRA'); //Serve para forçar alterar o valor, caso de evento async
+
+			const dados = document.getElementById('dados');
+			const obraSelecionada = document.getElementById('txtObraSelecionada');
+			if (dados) dados.style.display = 'grid';
+			if (obraSelecionada) obraSelecionada.innerHTML = obra;
 
 			btnFechaModalEquipamentos.click();
 
@@ -695,17 +725,10 @@
 		</nav>
 
 		<main class="container-fluid rba-civil-shell">
-			<section class="rba-hero">
-				<div>
-					<div class="rba-kicker">Controle operacional</div>
-					<h1>Civil</h1>
-					<p>Pesquise o equipamento para consultar vistorias, ficha, arquivos, solicitações de aditivo e follow-up da obra.</p>
-				</div>
-				<div class="text-md-end">
-					<button type="button" class="btn rba-primary-action" onclick="abrirPesquisa();">
-						<strong>Pesquisar equipamento <i class="fas fa-search ms-2"></i></strong>
-					</button>
-				</div>
+			<section class="rba-hero rba-hero-search-only" aria-label="Pesquisa de equipamentos">
+				<button type="button" class="btn rba-primary-action" onclick="abrirPesquisa();">
+					<strong>Pesquisar equipamento <i class="fas fa-search ms-2"></i></strong>
+				</button>
 			</section>
 
 			<section id="dados" class="rba-details-grid" style="display: none;">
