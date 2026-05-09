@@ -231,6 +231,41 @@ function injectCompatibilityScript(html: string, moduleKey: string, moduleTitle:
     }
   }
 
+
+  function looksLikeLegacyScript(value){
+    const text = String(value || '').trim();
+    if (!text) return false;
+
+    return (
+      text.indexOf('arrayGrafico') >= 0 ||
+      text.indexOf('drawTable') >= 0 ||
+      text.indexOf('visualizar(') >= 0 ||
+      text.indexOf('document.getElementById') >= 0 ||
+      text.indexOf('btnFechaModal') >= 0 ||
+      /^\s*(tabela\s*=|arrayGrafico\s*=|function\s+)/.test(text)
+    );
+  }
+
+  function runLegacyScript(value){
+    const scriptText = String(value || '').trim();
+    if (!scriptText) return;
+
+    try {
+      if (window.google && google.charts) {
+        google.charts.setOnLoadCallback(function(){
+          new Function(scriptText)();
+        });
+      } else {
+        new Function(scriptText)();
+      }
+    } catch (scriptError) {
+      throw new Error(
+        'Erro ao montar retorno legado: ' +
+        (scriptError && scriptError.message ? scriptError.message : String(scriptError))
+      );
+    }
+  }
+
   function showMessage(title, html){
     if (typeof window.mensagem === 'function') {
       try { window.mensagem(title || moduleTitle, html || '', 0, 1, 0); return; } catch(e) {}
@@ -251,7 +286,25 @@ function injectCompatibilityScript(html: string, moduleKey: string, moduleTitle:
       });
       const result = await response.json();
       if (!response.ok || !result.ok) throw new Error(result.message || 'Erro ao executar ação.');
-      if (result.html !== undefined) setHtml(chooseTarget(result), result.html);
+
+      const data = result && result.data ? result.data : {};
+
+      if (data.script) {
+        runLegacyScript(data.script);
+      }
+
+      if (result.html !== undefined) {
+        const htmlText = String(result.html ?? '');
+
+        if (looksLikeLegacyScript(htmlText)) {
+          const target = byId(chooseTarget(result));
+          if (target) target.innerHTML = '';
+          runLegacyScript(htmlText);
+        } else {
+          setHtml(chooseTarget(result), result.html);
+        }
+      }
+
       if (result.message) showMessage(moduleTitle, result.message);
     } catch (e) {
       showMessage('Erro', e && e.message ? e.message : String(e));

@@ -87,12 +87,6 @@
             color: #172e63 !important;
         }
 
-        .rba-notificacoes-shell {
-            max-width: 1180px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
     </style>
 
     <script type="text/javascript">
@@ -140,9 +134,30 @@
 			}
 
 			function drawTable() 
+    	{
+				var data = google.visualization.arrayToDataTable(arrayGrafico);
+
+				var options = {
+								width: '100em',
+								allowHtml: true
+								};
+
+				table = new google.visualization.Table(document.getElementById(tabela));
+				 
+				table.draw(data, options);
+			}
+
+
+        // Override seguro: a procedure retorna arrayGrafico/tabela e chama drawTable().
+        // Esta versão aguarda o Google Charts e usa largura 100%.
+        drawTable = function()
         {
-            if (!window.google || !google.visualization || !google.visualization.Table) {
-                google.charts.setOnLoadCallback(drawTable);
+            if (!window.google || !google.visualization || !google.visualization.Table)
+            {
+                if (window.google && google.charts)
+                {
+                    google.charts.setOnLoadCallback(drawTable);
+                }
                 return;
             }
 
@@ -156,11 +171,6 @@
             table = new google.visualization.Table(document.getElementById(tabela));
             table.draw(data, options);
         };
-
-				table = new google.visualization.Table(document.getElementById(tabela));
-				 
-				table.draw(data, options);
-			}
 
 			function visualizar(titulo,mensagem)
 			{
@@ -204,90 +214,6 @@
 
         	BTNPESQUISAR.click();
 	    }
-
-
-        function rbaEscapaHtml(texto) {
-            return String(texto || '')
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
-        }
-
-        function rbaPareceScriptLegado(texto) {
-            var conteudo = String(texto || '').trim();
-
-            if (!conteudo) return false;
-
-            return (
-                conteudo.indexOf('arrayGrafico') >= 0 ||
-                conteudo.indexOf('drawTable') >= 0 ||
-                conteudo.indexOf('visualizar(') >= 0 ||
-                conteudo.indexOf('btnFechaModalNotificacao') >= 0 ||
-                conteudo.indexOf('document.getElementById') >= 0
-            );
-        }
-
-        function rbaExecutaScriptLegadoDeElemento(elemento) {
-            if (!elemento) return;
-
-            var texto = String(elemento.textContent || '').trim();
-
-            if (!rbaPareceScriptLegado(texto)) return;
-
-            if (elemento.getAttribute('data-rba-script-executado') === texto) return;
-
-            elemento.setAttribute('data-rba-script-executado', texto);
-
-            try {
-                elemento.innerHTML = '';
-
-                if (window.google && google.charts) {
-                    google.charts.setOnLoadCallback(function() {
-                        new Function(texto)();
-                    });
-                } else {
-                    new Function(texto)();
-                }
-            } catch (e) {
-                elemento.innerHTML =
-                    '<div class="alert alert-danger mb-3">Erro ao montar o retorno legado: ' +
-                    rbaEscapaHtml(e && e.message ? e.message : String(e)) +
-                    '</div><pre class="small bg-light p-2 border rounded">' +
-                    rbaEscapaHtml(texto.substring(0, 2000)) +
-                    '</pre>';
-            }
-        }
-
-        function rbaVerificaScriptsLegados() {
-            rbaExecutaScriptLegadoDeElemento(document.getElementById('tableNotificacoes'));
-            rbaExecutaScriptLegadoDeElemento(document.getElementById('tableUsuarios'));
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            rbaVerificaScriptsLegados();
-
-            var alvos = [
-                document.getElementById('tableNotificacoes'),
-                document.getElementById('tableUsuarios')
-            ].filter(Boolean);
-
-            alvos.forEach(function(alvo) {
-                var observer = new MutationObserver(function() {
-                    setTimeout(rbaVerificaScriptsLegados, 0);
-                });
-
-                observer.observe(alvo, {
-                    childList: true,
-                    subtree: true,
-                    characterData: true
-                });
-            });
-
-            setTimeout(rbaVerificaScriptsLegados, 300);
-            setTimeout(rbaVerificaScriptsLegados, 1000);
-        });
 
 	    function mensagem(titulo,html,tempoFechar,mostraBotaoFechar,mostraSpinner)
 	    {
@@ -369,7 +295,7 @@
 	    </div>
 	</nav>
 
-	<div class="container rba-notificacoes-shell">
+	<div class="container">
 
 		<div class="row mx-2 mt-2 border border-success rounded shadow py-2 px-2" id="enviarNotificacao" style="display: none;">
 			<div class="col" align="center">
