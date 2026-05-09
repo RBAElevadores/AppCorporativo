@@ -236,6 +236,9 @@ function injectCompatibilityScript(html: string, moduleKey: string, moduleTitle:
       if (typeof window.RBAMainAfterRender === 'function') {
         try { window.RBAMainAfterRender(); } catch(e) {}
       }
+      if (typeof window.RBAFixVistoriasDom === 'function') {
+        try { window.RBAFixVistoriasDom(targetId); } catch(e) {}
+      }
     }
   }
 
@@ -477,17 +480,24 @@ function injectCompatibilityScript(html: string, moduleKey: string, moduleTitle:
 
       if (data.script) {
         runLegacyScript(data.script);
+        if (typeof window.RBAFixVistoriasDom === 'function') {
+          try { window.RBAFixVistoriasDom(chooseTarget(result)); } catch(e) {}
+        }
       }
 
       if (result.html !== undefined) {
         const htmlText = String(result.html ?? '');
+        const selectedTarget = chooseTarget(result);
 
         if (looksLikeLegacyScript(htmlText)) {
-          const target = byId(chooseTarget(result));
+          const target = byId(selectedTarget);
           if (target) target.innerHTML = '';
           runLegacyScript(htmlText);
+          if (typeof window.RBAFixVistoriasDom === 'function') {
+            try { window.RBAFixVistoriasDom(selectedTarget); } catch(e) {}
+          }
         } else {
-          setHtml(chooseTarget(result), result.html);
+          setHtml(selectedTarget, result.html);
         }
       }
 

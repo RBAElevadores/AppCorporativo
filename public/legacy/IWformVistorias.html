@@ -160,7 +160,7 @@
 			max-width: 1180px;
 			margin-left: auto;
 			margin-right: auto;
-			padding: 34px 24px 34px;
+			padding: 18px 24px 28px;
 		}
 
 		.rba-hero,
@@ -174,9 +174,9 @@
 		.rba-hero {
 			display: grid;
 			grid-template-columns: 1fr auto;
-			gap: 22px;
+			gap: 16px;
 			align-items: center;
-			padding: 10px 0 28px;
+			padding: 8px 0 14px;
 		}
 
 		.rba-kicker {
@@ -207,8 +207,8 @@
 			display: flex !important;
 			justify-content: center !important;
 			align-items: center !important;
-			min-height: calc(100vh - 220px);
-			padding: 72px 0 32px !important;
+			min-height: auto;
+			padding: 18px 0 18px !important;
 			text-align: center;
 		}
 
@@ -254,7 +254,7 @@
 
 		.rba-details-grid {
 			display: grid;
-			gap: 24px;
+			gap: 14px;
 		}
 
 		.rba-selected-card {
@@ -279,16 +279,16 @@
 		}
 
 		.rba-section-card {
-			padding: 8px 0 0;
+			padding: 0;
 		}
 
 		.rba-section-header {
 			display: flex;
 			align-items: center;
 			justify-content: space-between;
-			gap: 16px;
+			gap: 12px;
 			flex-wrap: wrap;
-			margin-bottom: 14px;
+			margin-bottom: 8px;
 		}
 
 		.rba-section-title {
@@ -314,6 +314,10 @@
 			padding: 16px;
 			box-shadow: 0 14px 35px rgba(23, 46, 99, 0.08);
 			overflow-x: auto;
+		}
+
+		#TableVistorias {
+			padding: 12px;
 		}
 
 		#TableVistorias:empty,
@@ -350,6 +354,38 @@
 			color: var(--rba-blue) !important;
 		}
 
+		.rba-modal-header-full {
+			display: block !important;
+			padding: 18px 18px 16px !important;
+		}
+
+		.rba-modal-header-full .row {
+			margin-left: 0 !important;
+			margin-right: 0 !important;
+		}
+
+		.rba-modal-title-line {
+			display: flex !important;
+			align-items: center !important;
+			justify-content: center !important;
+			position: relative !important;
+			width: 100% !important;
+			min-height: 32px !important;
+		}
+
+		.rba-modal-title-line .btn-close {
+			position: absolute !important;
+			right: 0 !important;
+			top: 50% !important;
+			transform: translateY(-50%) !important;
+		}
+
+		.rba-ficha-filter {
+			border-top: 1px solid #d8dce7;
+			margin-top: 12px;
+			padding-top: 12px;
+		}
+
 		.modal-title,
 		.modal-header h5,
 		.modal-header font {
@@ -382,7 +418,7 @@
 
 		@media (max-width: 768px) {
 			.rba-civil-shell {
-				padding: 24px 16px 28px;
+				padding: 12px 14px 22px;
 			}
 
 			.rba-hero {
@@ -400,8 +436,8 @@
 
 
 			.rba-hero-search-only {
-				min-height: calc(100vh - 180px);
-				padding-top: 44px !important;
+				min-height: auto;
+				padding: 14px 0 14px !important;
 			}
 
 			.rba-hero-search-only .rba-primary-action {
@@ -633,6 +669,19 @@
 			alert("remover");
 		}
 
+		window.RBAFixVistoriasDom = function(targetId) {
+			if (targetId === 'TableVistorias') {
+				try {
+					if (window.location.hash) {
+						history.replaceState(null, '', window.location.pathname + window.location.search);
+					}
+					window.scrollTo({ top: 0, behavior: 'smooth' });
+				} catch (e) {
+					window.scrollTo(0, 0);
+				}
+			}
+		};
+
 		function mostraFollowUP(data, nome, conseguiu, tipo, usuario, observacao) {
 
 			const modalElement = document.getElementById('FollowUPInfo');
@@ -856,47 +905,30 @@
 	<div class="modal fade" id="modalFicha" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="1"
 		role="dialog" aria-labelledby="modal_Ficha" aria-hidden="true">
 		<div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
-			<div class="modal-content border border-2 border-primary rounded">
-				<div class="modal-header shadow" style="background: #f7f7f7;">
-					<div class="row align-items-center">
-						<div class="row" align="right">
-							<div class="col" align="center">
-								<font color="#172e63"> <strong> Ficha </strong> </font>
-							</div>
-							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-								id="btnFechaModalFicha" onclick="modalFechar('modalFicha');"></button>
-						</div>
+			<div class="modal-content">
+				<div class="modal-header rba-modal-header-full">
+					<div class="rba-modal-title-line">
+						<h5 class="modal-title mb-0"><strong>Ficha</strong></h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+							id="btnFechaModalFicha" onclick="modalFechar('modalFicha');"></button>
+					</div>
 
-						<div class="row w-100 mt-3 border-top pt-2">
-							<div class="col">
-								<strong>
-									<font size="2"> Filtro: </font>
-								</strong>
-							</div>
-						</div>
-						<div class="row w-100 align-items-center">
-							<div class="col">
+					<div class="rba-ficha-filter">
+						<label class="form-label fw-bold mb-1" for="EDTPESQUISARFICHA">Filtro:</label>
+						<div class="row g-2 align-items-center">
+							<div class="col-12 col-md-8">
 								<input type="text" id="EDTPESQUISARFICHA" name="edtPesquisarFicha" data-iw-component="edtPesquisarFicha" class="form-control legacy-input" />
 							</div>
-						</div>
-						<div class="row w-100 mt-2 align-items-center">
-							<div class="col" align="center">
-								<button type="button" class="btn btn-primary btn-sm w-100"
-									onclick="filtrarFicha();">FILTRAR</button>
+							<div class="col-12 col-md-4">
+								<button type="button" class="btn rba-modal-action w-100" onclick="filtrarFicha();">FILTRAR</button>
 							</div>
 						</div>
 					</div>
 				</div>
 				<div class="modal-body">
-					<br>
-
-					<font size="2">
-						<div id="corpoFicha">
-							<!-- preenchido automaticamente -->
-						</div>
-					</font>
-
-					<br>
+					<div id="corpoFicha">
+						<!-- preenchido automaticamente -->
+					</div>
 				</div>
 			</div>
 		</div>

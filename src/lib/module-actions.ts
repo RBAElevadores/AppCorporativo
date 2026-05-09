@@ -65,6 +65,14 @@ function isEmailEnvioTipo(value: string): boolean {
   return normalized === '1' || normalized === 'email' || normalized.includes('mail');
 }
 
+function rewriteVistoriaArquivoUrls(value: string, vistoria: string): string {
+  const vistoriaId = encodeURIComponent(sqlInt(vistoria));
+  return String(value ?? '').replace(
+    /(?:\.\.\/)?(?:\/?wwwroot\/)?ArquivosVistoria\/(\d+)\.(jpeg|jpg|pdf)/gi,
+    (_match, seq: string, ext: string) => `/api/vistorias/arquivo/${encodeURIComponent(seq)}?vistoria=${vistoriaId}&ext=${encodeURIComponent(String(ext).toLowerCase())}`
+  );
+}
+
 function atendimento(form: FormDataObject): string {
   return sqlInt(field(form, 'atendimento', 'edtAtendimento', 'EDTATENDIMENTO'));
 }
@@ -334,7 +342,8 @@ if exists(select 1 from SmartBox.Atendimentos where Codigo = 0${cod} and DTInici
       }
       if (action === 'arquivosFotos') {
         if (vistoria === '0') throw new Error('Informe a vistoria antes de carregar arquivos e fotos.');
-        return execHtml(`exec SmartBox.USP_HTMLTecnicoOnlineVistoriaCarregarImagens 0${vistoria}`, undefined, 'corpoArquivosFotos');
+        const retorno = await sqlHtml(`exec SmartBox.USP_HTMLTecnicoOnlineVistoriaCarregarImagens 0${vistoria}`);
+        return htmlResult(rewriteVistoriaArquivoUrls(retorno, vistoria), undefined, 'corpoArquivosFotos');
       }
       if (action === 'envio') {
         if (vistoria === '0') throw new Error('Informe a vistoria antes de enviar.');
