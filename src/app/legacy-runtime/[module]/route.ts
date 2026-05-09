@@ -250,14 +250,33 @@ function injectCompatibilityScript(html: string, moduleKey: string, moduleTitle:
     const scriptText = String(value || '').trim();
     if (!scriptText) return;
 
+    function executeScript(){
+      new Function(scriptText)();
+    }
+
     try {
-      if (window.google && google.charts) {
-        google.charts.setOnLoadCallback(function(){
-          new Function(scriptText)();
-        });
-      } else {
-        new Function(scriptText)();
+      const precisaGoogleCharts =
+        scriptText.indexOf('drawTable') >= 0 ||
+        scriptText.indexOf('arrayGrafico') >= 0 ||
+        scriptText.indexOf('google.visualization') >= 0;
+
+      if (!precisaGoogleCharts) {
+        executeScript();
+        return;
       }
+
+      if (window.google && google.visualization && google.visualization.Table) {
+        executeScript();
+        return;
+      }
+
+      if (window.google && google.charts && typeof google.charts.load === 'function') {
+        google.charts.load('current', { packages: ['table'] });
+        google.charts.setOnLoadCallback(executeScript);
+        return;
+      }
+
+      executeScript();
     } catch (scriptError) {
       throw new Error(
         'Erro ao montar retorno legado: ' +
