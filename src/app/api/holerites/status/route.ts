@@ -37,6 +37,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: false, message: 'Arquivo de holerite não informado.' }, { status: 400 });
     }
 
+    const existe = await sqlScalar(`
+select count(1) Aux
+from Arquivos.dbo.ArquivosTempURL
+where Nome = ${sqlString(nome)}
+`);
+
     const pronto = await sqlScalar(`
 select 1 Aux
 from Arquivos.dbo.ArquivosTempURL
@@ -48,7 +54,12 @@ where Nome = ${sqlString(nome)}
 
     return NextResponse.json({
       ok: true,
-      data: { ready, nome, downloadUrl: ready ? `https://rbaelevadores.ddns.net/Arquivos/Temp/${encodeURIComponent(nome)}` : '' }
+      data: {
+        ready,
+        nome,
+        existe,
+        downloadUrl: ready ? `https://rbaelevadores.ddns.net/Arquivos/Temp/${encodeURIComponent(nome)}` : ''
+      }
     });
   } catch (error) {
     return NextResponse.json(

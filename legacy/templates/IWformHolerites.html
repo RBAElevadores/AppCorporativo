@@ -27,6 +27,74 @@
                           to { opacity: 1;margin-top: 0px;}
                       }
 
+
+        :root {
+            --rba-blue: #172e63;
+            --rba-green: #a8cf45;
+            --rba-light: #d8dce7;
+            --rba-white: #ffffff;
+            --rba-text: #23304d;
+            --rba-soft: #f4f6fa;
+        }
+
+        html, body {
+            min-height: 100%;
+        }
+
+        body {
+            background: var(--rba-soft);
+            color: var(--rba-text);
+            font-family: Poppins, Arial, sans-serif;
+        }
+
+        .rba-page-header {
+            background: rgba(255, 255, 255, 0.97);
+            min-height: 74px;
+            height: 74px;
+            border-bottom: 1px solid var(--rba-light);
+            display: flex;
+            align-items: center;
+            box-shadow: 0 3px 16px rgba(23, 46, 99, 0.08);
+        }
+
+        .rba-page-title {
+            color: var(--rba-blue);
+            font-weight: 800;
+            letter-spacing: 0.02em;
+            font-size: 18px;
+        }
+
+        .rba-back-icon {
+            color: var(--rba-blue);
+            cursor: pointer;
+        }
+
+        .rba-header-logo-img {
+            max-height: 54px;
+            max-width: 145px;
+            object-fit: contain;
+        }
+
+        .rba-holerites-container {
+            max-width: 1180px;
+        }
+
+        #tableHolerites {
+            min-height: 120px;
+        }
+
+        #tableHolerites button,
+        #tableHolerites .btn,
+        #tableHolerites input[type="button"] {
+            border-radius: 10px !important;
+            font-weight: 700 !important;
+            color: var(--rba-blue) !important;
+        }
+
+        #tableHolerites table {
+            width: 100% !important;
+        }
+
     </style>
 
     <script type="text/javascript">
@@ -208,13 +276,17 @@
 
         function downloadArquivo(url)
         {
-            const link = document.createElement('a');
-            link.href = url;
-            link.target = '_blank';
-            link.rel = 'noopener';
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
+            const html = '<div class="alert alert-success">Arquivo gerado com sucesso.</div>' +
+                         '<a class="btn btn-primary" target="_blank" rel="noopener" href="' + url + '">Abrir holerite</a>';
+
+            try {
+                const janela = window.open(url, '_blank', 'noopener');
+                if (!janela) {
+                    mensagem("Holerite", html, 0, 1, 0);
+                }
+            } catch (e) {
+                mensagem("Holerite", html, 0, 1, 0);
+            }
         }
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -269,23 +341,21 @@
 </head>
 <body>
 
-	<nav class="navbar navbar-expand-lg navbar-light bg-light">
+	<nav class="navbar navbar-expand-lg rba-page-header">
 	    <div class="row align-items-center w-100">
 	      <div class="col-2" align="left">
-	        <font class="ms-2" color="#14285a"> 
-	            <i class="fa-sharp fa-solid fa-circle-chevron-left fa-xl" style="cursor: pointer;" onclick="BTNVOLTAR.click();"></i> 
-	        </font>
+	        <i class="fa-sharp fa-solid fa-circle-chevron-left fa-xl rba-back-icon ms-2" onclick="BTNVOLTAR.click();"></i>
 	      </div>
 	      <div class="col" align="center">
-	        <strong> <font color="#14285a"> Holerites </font> </strong>
+	        <div class="rba-page-title">Holerites</div>
 	      </div>
 	      <div class="col-2" align="right">
-	        <img src="../wwwroot/RBA.png" class="img-fluid" style="max-width: 50px; max-height: 50px;">
+	        <img src="../wwwroot/RBA-header.png" class="img-fluid rba-header-logo-img" alt="RBA Elevadores">
 	      </div>
 	    </div>
 	</nav>
 
-	<div class="container">
+	<div class="container py-4 rba-holerites-container">
 <div id="tableHolerites"></div>
 
 	</div>
