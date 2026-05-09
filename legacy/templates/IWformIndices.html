@@ -730,6 +730,21 @@
 	    		return;
 	    	}
 
+	    	// Forma 1: retorno legado chama abrirHtmlCompletoNoModalIndice("html completo", "titulo").
+	    	if (texto.indexOf('abrirHtmlCompletoNoModalIndice') >= 0)
+	    	{
+	    		try
+	    		{
+	    			rbaFecharModalAguarde();
+	    			new Function(texto)();
+	    			return;
+	    		}
+	    		catch(e)
+	    		{
+	    			// Se a chamada original vier incompleta/malformada, cai no parser manual abaixo.
+	    		}
+	    	}
+
 	    	var chamadaHtmlCompleto = rbaExtrairAbrirHtmlCompleto(texto);
 
 	    	if (chamadaHtmlCompleto)
@@ -815,7 +830,6 @@
 	    {
 		    $("#txtTituloIndice").html(titulo || "");
 
-		    // Cria o iframe (altura ajustável)
 		    $("#corpoModalIndice").html(`
 		      <iframe id="iframeModalIndice"
 		              style="width:100%; height:78vh; border:0; background:#ffffff;"
@@ -824,22 +838,22 @@
 		    `);
 
 		    const iframe = document.getElementById("iframeModalIndice");
+		    const conteudo = String(htmlCompleto || "");
 
-		    // 1) Preferencial: srcdoc (mais simples)
-		    // 2) Fallback: document.open/write/close (para WebViews antigas)
-		    if ("srcdoc" in iframe) 
-		    {
-		      iframe.srcdoc = htmlCompleto;
-		    } 
-		    else 
+		    // Usa document.write em vez de srcdoc para se aproximar mais do comportamento
+		    // antigo do IntraWeb quando abria o HTML gerado dinamicamente.
+		    try
 		    {
 		      const doc = iframe.contentWindow.document;
 		      doc.open();
-		      doc.write(htmlCompleto);
+		      doc.write(conteudo);
 		      doc.close();
 		    }
+		    catch(e)
+		    {
+		      iframe.srcdoc = conteudo;
+		    }
 
-		    // Abre o modal
 		    btnModalIndice.click();
 		  }
 
