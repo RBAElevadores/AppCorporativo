@@ -180,8 +180,8 @@ export const MODULES: Record<string, ModuleDefinition> = {
   },
   vistorias: {
     key: 'vistorias',
-    title: 'Vistorias',
-    description: 'Pesquisa, carregamento, envio e follow-up de vistorias.',
+    title: 'Civil',
+    description: 'Pesquisa, carregamento, envio e follow-up da área civil.',
     legacyTemplate: 'IWformVistorias.html',
     fields: [
       { name: 'pesquisar', label: 'Pesquisar' },

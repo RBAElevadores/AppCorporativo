@@ -27,6 +27,11 @@ const NAV_BUTTONS: Record<string, string> = {
   BTNIAMONLINECHAT: '/legacy-runtime/iam-online'
 };
 
+
+const COMPONENT_LABELS: Record<string, string> = {
+  btnVistorias: 'Civil'
+};
+
 const COMPONENT_IDS: Record<string, string> = {
   btnClientes: 'BTNCLIENTES',
   btnIAMOnline: 'BTNIAMONLINE',
@@ -159,6 +164,8 @@ function componentId(name: string): string {
 }
 
 function labelFromComponent(name: string): string {
+  if (COMPONENT_LABELS[name]) return COMPONENT_LABELS[name];
+
   const clean = name
     .replace(/^btn/i, '')
     .replace(/^IWBtn/i, '')

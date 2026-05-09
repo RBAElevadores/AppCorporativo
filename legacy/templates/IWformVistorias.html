@@ -26,7 +26,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-	<link rel="sortcut icon" href="../wwwroot/ico.png" type="image/png" />
+	<link rel="sortcut icon" href="../wwwroot/Ico.png" type="image/png" />
 	<title> RBA - Técnico Online </title>
 
 	<style type="text/css">
@@ -96,6 +96,299 @@
 			z-index: 1000;
 			/* Defina um valor alto para z-index para garantir que o cabeçalho fique acima de outros elementos */
 		}
+
+		/* RBA padrao visual igual ao Main */
+		:root {
+			--rba-blue: #172e63;
+			--rba-blue-2: #2a4c98;
+			--rba-green: #a8cf45;
+			--rba-soft: #f4f6fa;
+			--rba-light: #d8dce7;
+			--rba-text: #23304d;
+		}
+
+		html,
+		body {
+			min-height: 100%;
+			background: var(--rba-soft) !important;
+			background-color: var(--rba-soft) !important;
+			color: var(--rba-text) !important;
+			font-family: Poppins, Arial, sans-serif !important;
+		}
+
+		.rba-page-header {
+			background: rgba(255, 255, 255, 0.97) !important;
+			min-height: 74px !important;
+			height: 74px !important;
+			border-bottom: 1px solid var(--rba-light) !important;
+			box-shadow: 0 3px 16px rgba(23, 46, 99, 0.08) !important;
+			display: flex !important;
+			align-items: center !important;
+		}
+
+		.rba-back-btn {
+			border: 0;
+			background: transparent;
+			color: var(--rba-blue);
+			padding: 0;
+			line-height: 1;
+		}
+
+		.rba-back-icon {
+			color: var(--rba-blue) !important;
+			font-size: 30px !important;
+			cursor: pointer;
+		}
+
+		.rba-page-title {
+			color: var(--rba-blue) !important;
+			font-weight: 800 !important;
+			font-size: 18px !important;
+			letter-spacing: 0.02em !important;
+		}
+
+		.rba-header-logo-img {
+			display: block;
+			width: auto;
+			height: auto;
+			max-width: 145px !important;
+			max-height: 54px !important;
+			object-fit: contain;
+		}
+
+		.rba-civil-shell {
+			max-width: 1180px;
+			margin-left: auto;
+			margin-right: auto;
+			padding: 34px 24px 34px;
+		}
+
+		.rba-hero,
+		.rba-section-card,
+		.rba-selected-card {
+			background: transparent;
+			border: none;
+			box-shadow: none;
+		}
+
+		.rba-hero {
+			display: grid;
+			grid-template-columns: 1fr auto;
+			gap: 22px;
+			align-items: center;
+			padding: 10px 0 28px;
+		}
+
+		.rba-kicker {
+			color: var(--rba-green);
+			font-size: 12px;
+			font-weight: 800;
+			letter-spacing: 0.12em;
+			text-transform: uppercase;
+			margin-bottom: 6px;
+		}
+
+		.rba-hero h1 {
+			color: var(--rba-blue);
+			font-size: 34px;
+			font-weight: 800;
+			margin: 0;
+		}
+
+		.rba-hero p {
+			color: #69738d;
+			font-size: 15px;
+			margin: 8px 0 0;
+			max-width: 660px;
+		}
+
+		.rba-primary-action,
+		.rba-secondary-action,
+		.rba-success-action,
+		.rba-danger-action,
+		.rba-modal-action {
+			min-height: 46px !important;
+			border-radius: 12px !important;
+			border: none !important;
+			padding: 10px 18px !important;
+			font-size: 13px !important;
+			font-weight: 800 !important;
+			box-shadow: 0 12px 28px rgba(23, 46, 99, 0.14) !important;
+		}
+
+		.rba-primary-action,
+		.rba-modal-action {
+			color: #ffffff !important;
+			background: linear-gradient(135deg, var(--rba-blue) 0%, var(--rba-blue-2) 100%) !important;
+		}
+
+		.rba-secondary-action {
+			color: var(--rba-blue) !important;
+			background: linear-gradient(135deg, #e8edf6 0%, #ffffff 100%) !important;
+			border: 1px solid #cfd6e4 !important;
+		}
+
+		.rba-success-action {
+			color: var(--rba-blue) !important;
+			background: linear-gradient(135deg, #8ebd33 0%, var(--rba-green) 100%) !important;
+		}
+
+		.rba-danger-action {
+			color: #ffffff !important;
+			background: linear-gradient(135deg, #b02a37 0%, #dc3545 100%) !important;
+		}
+
+		.rba-details-grid {
+			display: grid;
+			gap: 24px;
+		}
+
+		.rba-selected-card {
+			border-left: 5px solid var(--rba-green) !important;
+			padding: 0 0 0 18px !important;
+		}
+
+		.rba-card-label {
+			display: block;
+			color: #69738d;
+			font-size: 12px;
+			font-weight: 800;
+			letter-spacing: 0.08em;
+			text-transform: uppercase;
+			margin-bottom: 4px;
+		}
+
+		.rba-selected-card strong,
+		.rba-section-title {
+			color: var(--rba-blue) !important;
+			font-weight: 800 !important;
+		}
+
+		.rba-section-card {
+			padding: 8px 0 0;
+		}
+
+		.rba-section-header {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 16px;
+			flex-wrap: wrap;
+			margin-bottom: 14px;
+		}
+
+		.rba-section-title {
+			font-size: 18px;
+			letter-spacing: 0.01em;
+		}
+
+		.rba-section-subtitle {
+			color: #69738d;
+			font-size: 13px;
+			margin-top: 3px;
+		}
+
+		#TableVistorias,
+		#TableFollowUP,
+		#TableEquipamentos,
+		#corpoFicha,
+		#corpoVistoria,
+		#corpoArquivosFotos {
+			background: #ffffff;
+			border: 1px solid #d8dce7;
+			border-radius: 16px;
+			padding: 16px;
+			box-shadow: 0 14px 35px rgba(23, 46, 99, 0.08);
+			overflow-x: auto;
+		}
+
+		#TableVistorias:empty,
+		#TableFollowUP:empty {
+			display: none;
+		}
+
+		table {
+			width: 100% !important;
+		}
+
+		table button,
+		table .btn,
+		table input[type="button"],
+		#TableEquipamentos button,
+		#TableEquipamentos .btn,
+		#TableVistorias button,
+		#TableVistorias .btn,
+		#TableFollowUP button,
+		#TableFollowUP .btn {
+			border-radius: 10px !important;
+			font-weight: 700 !important;
+		}
+
+		.modal-content {
+			border: 0 !important;
+			border-radius: 18px !important;
+			box-shadow: 0 18px 55px rgba(23, 46, 99, 0.20) !important;
+		}
+
+		.modal-header {
+			background: #ffffff !important;
+			border-bottom: 1px solid #d8dce7 !important;
+			color: var(--rba-blue) !important;
+		}
+
+		.modal-title,
+		.modal-header h5,
+		.modal-header font {
+			color: var(--rba-blue) !important;
+			font-weight: 800 !important;
+		}
+
+		.modal-body {
+			background: #ffffff !important;
+		}
+
+		.form-control,
+		.form-select,
+		textarea,
+		select,
+		input[type="text"] {
+			border: 1px solid #cfd6e4 !important;
+			border-radius: 10px !important;
+			box-shadow: none !important;
+		}
+
+		.form-control:focus,
+		.form-select:focus,
+		textarea:focus,
+		select:focus,
+		input[type="text"]:focus {
+			border-color: var(--rba-blue) !important;
+			box-shadow: 0 0 0 0.2rem rgba(23, 46, 99, 0.10) !important;
+		}
+
+		@media (max-width: 768px) {
+			.rba-civil-shell {
+				padding: 24px 16px 28px;
+			}
+
+			.rba-hero {
+				grid-template-columns: 1fr;
+				padding-bottom: 22px;
+			}
+
+			.rba-hero h1 {
+				font-size: 28px;
+			}
+
+			.rba-primary-action {
+				width: 100%;
+			}
+
+			.rba-header-logo-img {
+				max-width: 118px !important;
+			}
+		}
+
 	</style>
 
 	<script type="text/javascript">
@@ -206,8 +499,15 @@
 		}
 
 		function lancarFollowUp() {
+			const obra = document.getElementById('EDTOBRA').value;
+			mensagem('Follow UP', 'Registrando contato, aguarde...', 0, 0, 1);
 			BTNLANCAFOLLOWUP.click();
-			selecionar(document.getElementById('EDTOBRA').value);
+
+			setTimeout(function () {
+				const modal = bootstrap.Modal.getInstance(document.getElementById('modalFollowUp'));
+				if (modal) modal.hide();
+				if (obra) selecionar(obra);
+			}, 900);
 		}
 
 
@@ -380,98 +680,68 @@
 
 </head>
 
-<body>
+	<body class="rba-civil-body">
 
-	<nav class="navbar navbar-expand-lg navbar-light bg-light">
-		<div class="row align-items-center w-100">
-			<div class="col-2" align="left">
-				<font class="ms-2" color="#14285a">
-					<i class="fa-sharp fa-solid fa-circle-chevron-left fa-xl" style="cursor: pointer;"
-						onclick="BTNVOLTAR.click();"></i>
-				</font>
-			</div>
-			<div class="col" align="center">
-				<strong>
-					<font color="#14285a"> CIVIL </font>
-				</strong>
-			</div>
-			<div class="col-2" align="right">
-				<img src="../wwwroot/RBA.png" class="img-fluid" style="max-width: 50px; max-height: 50px;">
-			</div>
-		</div>
-	</nav>
-
-	<div class="container">
-
-		<br>
-
-		<font color="#172e63">
-
-			<div class="row">
-				<div class="col" align="center">
-					<button type="button" class="btn btn-outline-dark" onclick="abrirPesquisa();">
-						<strong> PESQUISAR EQUIPAMENTO <i class="fas fa-search"></i> </strong>
+		<nav class="navbar navbar-expand-lg rba-page-header">
+			<div class="container-fluid px-3 px-md-4">
+				<div class="d-flex align-items-center justify-content-between w-100">
+					<button type="button" class="rba-back-btn" onclick="BTNVOLTAR.click();" aria-label="Voltar">
+						<i class="fa-sharp fa-solid fa-circle-chevron-left fa-xl rba-back-icon"></i>
 					</button>
+					<div class="rba-page-title text-center">CIVIL</div>
+					<img src="../wwwroot/RBA-header.png" class="img-fluid rba-header-logo-img" alt="RBA Elevadores">
 				</div>
 			</div>
+		</nav>
 
-			<br>
+		<main class="container-fluid rba-civil-shell">
+			<section class="rba-hero">
+				<div>
+					<div class="rba-kicker">Controle operacional</div>
+					<h1>Civil</h1>
+					<p>Pesquise o equipamento para consultar vistorias, ficha, arquivos, solicitações de aditivo e follow-up da obra.</p>
+				</div>
+				<div class="text-md-end">
+					<button type="button" class="btn rba-primary-action" onclick="abrirPesquisa();">
+						<strong>Pesquisar equipamento <i class="fas fa-search ms-2"></i></strong>
+					</button>
+				</div>
+			</section>
 
-			<div id="dados" style="display: none;">
-				<br>
+			<section id="dados" class="rba-details-grid" style="display: none;">
+				<div class="rba-selected-card">
+					<span class="rba-card-label">Equipamento selecionado</span>
+					<strong><span id="txtObraSelecionada"></span></strong>
+				</div>
 
-				<div class="container rounded border border-dark">
-					<div class="row my-2">
-						<div class="col" align="left">
-							<font size=2> <text id="txtObraSelecionada"></text> </font>
+				<div class="rba-section-card">
+					<div class="rba-section-header">
+						<div>
+							<div class="rba-section-title">Vistorias</div>
+							<div class="rba-section-subtitle">Abra uma vistoria para visualizar detalhes, ficha, fotos, envio e aditivo.</div>
 						</div>
 					</div>
+					<div id="TableVistorias" style="display: none;"></div>
 				</div>
 
-				<br>
-				<hr>
-				<br>
-
-				<div class="row">
-					<div class="col" align="center">
-						<strong> VISTORIAS </strong>
+				<div class="rba-section-card">
+					<div class="rba-section-header">
+						<div>
+							<div class="rba-section-title">Follow Up</div>
+							<div class="rba-section-subtitle">Registre e consulte contatos relacionados ao acompanhamento civil.</div>
+						</div>
+						<button class="btn rba-success-action" data-bs-toggle="modal" data-bs-target="#modalFollowUp">
+							Lançar Follow Up
+						</button>
 					</div>
+					<div id="TableFollowUP"></div>
+					<div id="FollowUPInfo" class="modal fade"></div>
 				</div>
-
-				<br>
-
-				<div id="TableVistorias" style="display: none;"></div>
-
-				<br>
-				<hr>
-				<br>
-
-				<div class="row">
-					<div class="col" align="center">
-						<strong> FOLLOW UP </strong>
-					</div>
-				</div>
-
-				<br>
-
-				<div id="TableFollowUP"></div>
+			</section>
+		</main>
 
 
-
-				<div class="w-100 d-flex align-items-center justify-content-center">
-					<button class="btn btn-success mx-auto mt-4" data-bs-toggle="modal" data-bs-target="#modalFollowUp">
-						Lançar Follow Up
-					</button>
-				</div>
-
-				<div id="FollowUPInfo" class="modal fade">a</div>
-			</div>
-
-		</font>
-	</div>
-
-
-	<!-- Modal Follow UP -->
+		<!-- Modal Follow UP -->
 	<div class="modal fade" id="modalFollowUp" tabindex="-1" aria-hidden="true">
 		<div class="modal-dialog modal-lg modal-dialog-centered">
 			<div class="modal-content">
@@ -852,9 +1122,6 @@
 			{%edtEnvioCopia%}
 			{%memoDescAditivo%}
 			{%btnSolicitaAditivo%}
-			{%cbxConseguiuContato%}
-			{%edtNomeContato%}
-			{%memoDetalheContato%}
 			{%btnLancaFollowUp%}
 			<button type="button" data-bs-toggle="modal" data-bs-target="#ModalMensagem" id="btnModalMensagem"
 				onclick="modalAbrir('modalMensagem');"> </button>
@@ -869,7 +1136,7 @@
 				onclick="modalAbrir('modalFicha');"></button>
 			<button type="button" data-bs-toggle="modal" data-bs-target="#modalArquivos" id="btnModalArquivos"
 				onclick="modalAbrir('modalArquivos');"></button>
-			<button type="button" data-bs-toggle="modal" data-bs-target="#modalAditivo" id="btnModalAditivo"
+			<button type="button" data-bs-toggle="modal" data-bs-target="#ModalAditivo" id="btnModalAditivo"
 				onclick="modalAbrir('modalAditivo');"></button>
 		</div>
 	</div>

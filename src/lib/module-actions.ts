@@ -55,6 +55,16 @@ function obra(form: FormDataObject): string {
   return sqlInt(field(form, 'obra', 'edtObra', 'EDTOBRA'));
 }
 
+function isWhatsappEnvioTipo(value: string): boolean {
+  const normalized = value.trim().toLowerCase();
+  return normalized === '2' || normalized.includes('whats');
+}
+
+function isEmailEnvioTipo(value: string): boolean {
+  const normalized = value.trim().toLowerCase();
+  return normalized === '1' || normalized === 'email' || normalized.includes('mail');
+}
+
 function atendimento(form: FormDataObject): string {
   return sqlInt(field(form, 'atendimento', 'edtAtendimento', 'EDTATENDIMENTO'));
 }
@@ -305,40 +315,81 @@ if exists(select 1 from SmartBox.Atendimentos where Codigo = 0${cod} and DTInici
     case 'vistorias': {
       const vistoria = sqlInt(field(form, 'vistoria', 'edtVistoria', 'EDTVISTORIA'));
       if (action === 'pesquisar') {
-        return execHtml(`exec SmartBox.[USP_HTMLTecnicoOnlineVistoriasPesquisa] ${sqlString(field(form, 'pesquisar', 'edtPesquisar', 'EDTPESQUISAR'))}, 0${session.codigo}`);
+        const pesquisa = field(form, 'pesquisar', 'edtPesquisar', 'EDTPESQUISAR').trim();
+        if (!pesquisa) throw new Error('Preencha alguma informação antes de pesquisar.');
+        return execHtml(`exec SmartBox.[USP_HTMLTecnicoOnlineVistoriasPesquisa] ${sqlString(pesquisa)}, 0${session.codigo}`, undefined, 'TableEquipamentos');
       }
       if (action === 'carregar') {
-        return execHtml(`exec SmartBox.USP_HTMLTecnicoOnlineVistoriasCarregar 0${vistoria}`);
+        if (vistoria === '0') throw new Error('Informe a vistoria antes de carregar.');
+        return execHtml(`exec SmartBox.USP_HTMLTecnicoOnlineVistoriasCarregar 0${vistoria}`, undefined, 'corpoVistoria');
       }
       if (action === 'carregarFicha') {
-        return execHtml(`exec SmartBox.USP_HTMLTecnicoOnlineVistoriaCarregarFicha ${sqlString(vistoria)}, ${sqlString(field(form, 'pesquisarFicha', 'edtPesquisarFicha', 'EDTPESQUISARFICHA'))}`);
+        if (vistoria === '0') throw new Error('Informe a vistoria antes de carregar a ficha.');
+        return execHtml(`exec SmartBox.USP_HTMLTecnicoOnlineVistoriaCarregarFicha ${sqlString(vistoria)}, ${sqlString(field(form, 'pesquisarFicha', 'edtPesquisarFicha', 'EDTPESQUISARFICHA'))}`, undefined, 'corpoFicha');
       }
       if (action === 'carregarObra') {
-        return execHtml(`exec SmartBox.USP_HTMLTecnicoOnlineVistorias 0${obra(form)}`);
+        const codObra = obra(form);
+        if (codObra === '0') throw new Error('Informe a obra antes de carregar.');
+        return execHtml(`exec SmartBox.USP_HTMLTecnicoOnlineVistorias 0${codObra}`, undefined, 'TableVistorias');
       }
       if (action === 'arquivosFotos') {
-        return execHtml(`exec SmartBox.USP_HTMLTecnicoOnlineVistoriaCarregarImagens 0${vistoria}`);
+        if (vistoria === '0') throw new Error('Informe a vistoria antes de carregar arquivos e fotos.');
+        return execHtml(`exec SmartBox.USP_HTMLTecnicoOnlineVistoriaCarregarImagens 0${vistoria}`, undefined, 'corpoArquivosFotos');
       }
       if (action === 'envio') {
-        const destino = field(form, 'envio', 'edtEnvio', 'EDTENVIO');
-        const tipo = field(form, 'envioTipo', 'edtEnvioTipo', 'EDTENVIOtipo').toLowerCase();
-        if (tipo.includes('whats')) {
+        if (vistoria === '0') throw new Error('Informe a vistoria antes de enviar.');
+        const destinoPrincipal = field(form, 'envio', 'edtEnvio', 'EDTENVIO').trim();
+        const destinoCopia = field(form, 'envioCopia', 'edtEnvioCopia', 'EDTENVIOCOPIA').trim();
+        const destino = [destinoPrincipal, destinoCopia].filter(Boolean).join(';');
+        const tipo = field(form, 'envioTipo', 'edtEnvioTipo', 'EDTENVIOTIPO', 'EDTENVIOtipo');
+
+        if (!destino) throw new Error('Preencha o destino antes de enviar.');
+
+        if (isWhatsappEnvioTipo(tipo)) {
           await requirePermission(session, 'Vistorias: Enviar WhatsApp');
           await callSql(`exec dbo.USP_EnviaWhatsAppVistoria 0${vistoria}, ${sqlString(destino)}`);
-        } else {
-          await requirePermission(session, 'Vistorias: Enviar E-Mail');
-          await callSql(`exec dbo.USP_EnviaEmailVistoria 0${vistoria}, ${sqlString(destino)}`);
+          return messageResult('Envio por WhatsApp solicitado.');
         }
-        return messageResult('Envio solicitado.');
+
+        if (!isEmailEnvioTipo(tipo)) {
+          throw new Error('Tipo de envio inválido. Informe e-mail ou WhatsApp.');
+        }
+
+        await requirePermission(session, 'Vistorias: Enviar E-Mail');
+        await callSql(`exec dbo.USP_EnviaEmailVistoria 0${vistoria}, ${sqlString(destino)}`);
+        return messageResult('Envio por e-mail solicitado.');
       }
       if (action === 'solicitaAditivo') {
+        if (vistoria === '0') throw new Error('Informe a vistoria antes de solicitar aditivo.');
+        const descricao = field(form, 'descAditivo', 'memoDescAditivo', 'MEMODESCADITIVO').trim();
+        if (!descricao) throw new Error('Informe a descrição do aditivo.');
+
         const codObra = await sqlScalar(`select Obra from ObraVistorias where Seq = 0${vistoria}`);
-        await callSql(`insert into SolicitacaoAditivo(Obra,Status,UsuInsert,Descricao) select 0${sqlInt(codObra)}, 'Aditivo Solicitado', 0${session.codigo}, ${sqlString(field(form, 'descAditivo', 'memoDescAditivo', 'MEMODESCAditivo'))}`);
+        if (!codObra.trim()) throw new Error('Não foi possível encontrar a obra da vistoria.');
+
+        const emPlanejamento = await sqlScalar(`select 1 aux from Producao.OPPlanejamento_Itens a inner join Producao.Pedidos b on b.Seq = a.OP where b.Obra = 0${sqlInt(codObra)}`);
+        if (emPlanejamento === '1') throw new Error('Este equipamento já está em um Planejamento de Fabricação. Falar com o PCP.');
+
+        await callSql(`insert into SolicitacaoAditivo(Obra,Status,UsuInsert,Descricao) select 0${sqlInt(codObra)}, 'Aditivo Solicitado', 0${session.codigo}, ${sqlString(descricao)}`);
         return messageResult('Solicitação de aditivo lançada.');
       }
       if (action === 'lancaFollowUp') {
-        const ret = await sqlScalar(`exec Telas.USP_LancaFollowUP @Obra = 0${obra(form)}, @Usuario = ${session.codigo}, @ConseguiuContato = ${sqlString(field(form, 'conseguiuContato', 'cbxConseguiuContato', 'CBXCONSEGUIUCONTATO'))}, @Observacao = ${sqlString(field(form, 'detalheContato', 'memoDetalheContato', 'MEMODETALHECONTATO'))}, @Tipo = 'Civil', @NomeContato = ${sqlString(field(form, 'nomeContato', 'edtNomeContato', 'EDTNOMECONTATO'))}`);
-        return messageResult(ret !== '0' ? 'Follow-up lançado.' : 'Follow-up não foi lançado.');
+        const conseguiuContato = field(form, 'conseguiuContato', 'cbxConseguiuContato', 'CBXCONSEGUIUCONTATO').trim();
+        const nomeContato = field(form, 'nomeContato', 'edtNomeContato', 'EDTNOMECONTATO').trim();
+        const detalheContato = field(form, 'detalheContato', 'memoDetalheContato', 'MEMODETALHECONTATO').trim();
+        const conseguiuLower = conseguiuContato.toLowerCase();
+
+        if (!conseguiuContato) throw new Error('Preencha os campos de contato.');
+        if (conseguiuLower === 'sim' && !nomeContato) throw new Error('Digite o nome do contato.');
+        if ((conseguiuLower === 'não' || conseguiuLower === 'nao') && nomeContato) throw new Error('Contato marcado como não realizado não deve ter nome de contato.');
+        if (!detalheContato) throw new Error('Digite alguma informação para registrar o contato.');
+
+        const codObra = obra(form);
+        if (codObra === '0') throw new Error('Informe a obra antes de lançar o follow-up.');
+
+        const ret = await sqlScalar(`exec Telas.USP_LancaFollowUP @Obra = 0${codObra}, @Usuario = ${session.codigo}, @ConseguiuContato = ${sqlString(conseguiuContato)}, @Observacao = ${sqlString(detalheContato)}, @Tipo = 'Civil', @NomeContato = ${sqlString(nomeContato)}`);
+        if (ret !== '0') throw new Error('O follow-up não foi lançado.');
+        return messageResult('Follow-up registrado.');
       }
       break;
     }
