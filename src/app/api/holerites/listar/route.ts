@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AUTH_COOKIE, parseSessionCookie } from '@/lib/session';
-import { callSql, sqlHtml } from '@/lib/sql';
+import { sqlHtml } from '@/lib/sql';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -16,14 +16,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    await callSql('delete from Arquivos.dbo.ArquivosTempURL where not DtCriouServidor is null and Arquivo is null');
-
     const retorno = await sqlHtml(`exec SmartBox.USP_HTMLTecnicoOnlineHolerites 0${session.codigo}`);
 
-    return NextResponse.json({ ok: true, retorno });
+    return NextResponse.json({
+      ok: true,
+      retorno
+    });
   } catch (error) {
     return NextResponse.json(
-      { ok: false, message: error instanceof Error ? error.message : 'Erro ao carregar holerites.' },
+      {
+        ok: false,
+        message: error instanceof Error ? error.message : 'Erro ao carregar holerites.'
+      },
       { status: 500 }
     );
   }

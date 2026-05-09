@@ -88,67 +88,48 @@ function endpointErrorFromParsed(parsed: unknown): string | null {
   return String(value);
 }
 
+function resolveReadSqlEndpoint(): string {
+  const endpoint = process.env.RBA_SQL_ENDPOINT;
 
-function normalizedFirstSqlToken(script: string): string {
-  let text = String(script ?? '');
-
-  // Remove comentários iniciais simples para identificar o primeiro comando real.
-  text = text.replace(/^\s*(--[^\r\n]*(?:\r?\n|$)\s*)+/g, '');
-  text = text.replace(/^\s*(\/\*[\s\S]*?\*\/\s*)+/g, '');
-
-  const match = text.trim().match(/^([a-zA-Z]+)/);
-  return match ? match[1].toLowerCase() : '';
-}
-
-function shouldUseExecuteSqlEndpoint(script: string): boolean {
-  const firstToken = normalizedFirstSqlToken(script);
-
-  if (!firstToken) return false;
-
-  // Conforme combinado:
-  // - SELECT direto continua no /retornasqljson.
-  // - EXEC de procedures continua no /retornasqljson.
-  // - O restante, especialmente INSERT/UPDATE/DELETE, vai para /executasql.
-  if (firstToken === 'select' || firstToken === 'exec' || firstToken === 'execute' || firstToken === 'with') {
-    return false;
-  }
-
-  return true;
-}
-
-function resolveSqlEndpoint(script: string): string {
-  const readEndpoint = process.env.RBA_SQL_ENDPOINT;
-
-  if (!readEndpoint) {
+  if (!endpoint) {
     throw new Error('Variável RBA_SQL_ENDPOINT não configurada no ambiente.');
   }
 
-  if (!shouldUseExecuteSqlEndpoint(script)) {
-    return readEndpoint;
-  }
+  return endpoint;
+}
 
-  const explicitExecuteEndpoint =
+function resolveWriteSqlEndpoint(): string {
+  const explicitEndpoint =
     process.env.RBA_EXEC_SQL_ENDPOINT ||
     process.env.RBA_SQL_EXEC_ENDPOINT;
 
-  if (explicitExecuteEndpoint) {
-    return explicitExecuteEndpoint;
+  if (explicitEndpoint) {
+    return explicitEndpoint;
   }
 
-  // Padrão do ambiente atual:
-  // https://iam.rbaelevadores.com.br/retornasqljson
-  // vira:
-  // https://iam.rbaelevadores.com.br/executasql
-  if (/\/retornasqljson\/?$/i.test(readEndpoint)) {
+  const readEndpoint = resolveReadSqlEndpoint();
+
+  try {
+    const url = new URL(readEndpoint);
+    return `${url.origin}/executasql`;
+  } catch {
     return readEndpoint.replace(/\/retornasqljson\/?$/i, '/executasql');
   }
-
-  return readEndpoint.replace(/\/+$/, '') + '/executasql';
 }
 
-export async function callSql(script: string): Promise<SqlRow[]> {
-  const endpoint = resolveSqlEndpoint(script);
+function removeSqlStringsAndComments(script: string): string {
+  return String(script ?? '')
+    .replace(/--[^\r\n]*/g, ' ')
+    .replace(/\/\*[\s\S]*?\*\//g, ' ')
+    .replace(/N?'(?:''|[^'])*'/gi, "''");
+}
 
+function containsWriteCommand(script: string): boolean {
+  const normalized = removeSqlStringsAndComments(script);
+  return /\b(insert|update|delete)\b/i.test(normalized);
+}
+
+async function postSql(endpoint: string, script: string): Promise<SqlRow[]> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json'
   };
@@ -190,8 +171,22 @@ export async function callSql(script: string): Promise<SqlRow[]> {
   return [{ Retorno: parsed }];
 }
 
+export async function readSql(script: string): Promise<SqlRow[]> {
+  return postSql(resolveReadSqlEndpoint(), script);
+}
+
+export async function executeSql(script: string): Promise<SqlRow[]> {
+  return postSql(resolveWriteSqlEndpoint(), script);
+}
+
+export async function callSql(script: string): Promise<SqlRow[]> {
+  return containsWriteCommand(script)
+    ? executeSql(script)
+    : readSql(script);
+}
+
 export async function sqlScalar(script: string): Promise<string> {
-  const rows = await callSql(script);
+  const rows = await readSql(script);
   return firstValue(rows[0]);
 }
 

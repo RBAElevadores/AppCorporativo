@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AUTH_COOKIE, parseSessionCookie } from '@/lib/session';
-import { callSql, sqlInt } from '@/lib/sql';
+import { executeSql, sqlInt } from '@/lib/sql';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
 
     const nome = `Holerite_${seq}.pdf`;
 
-    const scriptPedido = `
+    await executeSql(`
 delete from Arquivos.dbo.ArquivosTempURL
 where not DtCriouServidor is null
   and Arquivo is null
@@ -55,12 +55,7 @@ insert into Arquivos.dbo.ArquivosTempURL(Arquivo,Nome)
 select Arquivo, 'Holerite_'+cast(Seq as varchar(10))+'.pdf'
 from Arquivos.FolhaSalarial.Holerites
 where Seq = ${seq}
-`;
-
-    // Igual ao IntraWeb/Delphi: apenas solicita a criação do arquivo temporário.
-    // Não faço SELECT de confirmação aqui, porque esse SELECT estava causando falso erro 500.
-    // O acompanhamento fica na rota /api/holerites/status.
-    await callSql(scriptPedido);
+`);
 
     return NextResponse.json({
       ok: true,
