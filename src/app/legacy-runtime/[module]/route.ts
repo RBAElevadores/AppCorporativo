@@ -230,7 +230,7 @@ function injectCompatibilityScript(html: string, moduleKey: string, moduleTitle:
 
   function setHtml(target, html){
     const targetId = target || defaultTarget;
-    const el = byId(targetId) || byId(defaultTarget) || byId('corpo') || byId('atendimentos') || byId('dados') || byId('TableClientes') || byId('TableFichas') || byId('TableVistorias') || byId('tableOS') || byId('tableNotificacoes') || byId('corpoModalMensagem');
+    const el = byId(targetId) || byId(defaultTarget) || byId('corpo') || byId('atendimentos') || byId('dados') || byId('TableClientes') || byId('TableFichas') || byId('TableEquipamentos') || byId('TableVistorias') || byId('tableOS') || byId('tableNotificacoes') || byId('corpoModalMensagem');
     if (el) {
       el.innerHTML = html || '';
       if (typeof window.RBAMainAfterRender === 'function') {
@@ -238,6 +238,9 @@ function injectCompatibilityScript(html: string, moduleKey: string, moduleTitle:
       }
       if (typeof window.RBAFixVistoriasDom === 'function') {
         try { window.RBAFixVistoriasDom(targetId); } catch(e) {}
+      }
+      if (typeof window.RBAFixEntregaTecnicaDom === 'function') {
+        try { window.RBAFixEntregaTecnicaDom(targetId); } catch(e) {}
       }
     }
   }
@@ -483,6 +486,9 @@ function injectCompatibilityScript(html: string, moduleKey: string, moduleTitle:
         if (typeof window.RBAFixVistoriasDom === 'function') {
           try { window.RBAFixVistoriasDom(chooseTarget(result)); } catch(e) {}
         }
+        if (typeof window.RBAFixEntregaTecnicaDom === 'function') {
+          try { window.RBAFixEntregaTecnicaDom(chooseTarget(result)); } catch(e) {}
+        }
       }
 
       if (result.html !== undefined) {
@@ -495,6 +501,9 @@ function injectCompatibilityScript(html: string, moduleKey: string, moduleTitle:
           runLegacyScript(htmlText);
           if (typeof window.RBAFixVistoriasDom === 'function') {
             try { window.RBAFixVistoriasDom(selectedTarget); } catch(e) {}
+          }
+          if (typeof window.RBAFixEntregaTecnicaDom === 'function') {
+            try { window.RBAFixEntregaTecnicaDom(selectedTarget); } catch(e) {}
           }
         } else {
           setHtml(selectedTarget, result.html);

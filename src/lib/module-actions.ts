@@ -302,20 +302,33 @@ if exists(select 1 from SmartBox.Atendimentos where Codigo = 0${cod} and DTInici
     }
 
     case 'entrega-tecnica': {
+      const codObra = obra(form);
       if (action === 'pesquisar') {
         await requirePermission(session, 'App Corporativo: Gerencial: Entrega Técnica');
-        return execHtml(`exec SmartBox.[USP_HTMLTecnicoOnlineEntregaTecnicaPesquisa] ${sqlString(field(form, 'pesquisar', 'edtPesquisar', 'EDTPESQUISAR'))}, 0${session.codigo}`);
+        const pesquisa = field(form, 'pesquisar', 'edtPesquisar', 'EDTPESQUISAR').trim();
+        if (!pesquisa) throw new Error('Preencha alguma informação antes de pesquisar.');
+        return execHtml(`exec SmartBox.[USP_HTMLTecnicoOnlineEntregaTecnicaPesquisa] ${sqlString(pesquisa)}, 0${session.codigo}`, undefined, 'TableEquipamentos');
       }
       if (action === 'carregar') {
-        return execHtml(`exec SmartBox.USP_HTMLTecnicoOnlineEntregaTecnicaCarregar 0${obra(form)}, 0${session.codigo}`);
+        if (codObra === '0') throw new Error('Selecione um equipamento antes de carregar.');
+        return execHtml(`exec SmartBox.USP_HTMLTecnicoOnlineEntregaTecnicaCarregar 0${codObra}, 0${session.codigo}`, undefined, 'dados');
       }
       if (action === 'acessarEntregaTecnica') {
-        const ret = await sqlScalar(`exec SmartBox.USP_AcessarEntregaTecnica 0${obra(form)}, 0${session.codigo}, 0${sqlInt(field(form, 'acessarEntregaTecnica', 'edtAcessarEntregaTecnica', 'EDTACESSARENTREGATECNICA'))}`);
-        return messageResult(ret || 'Solicitação executada.');
+        if (codObra === '0') throw new Error('Selecione um equipamento antes de acessar a entrega técnica.');
+        const tipoAcesso = sqlInt(field(form, 'acessarEntregaTecnica', 'edtAcessarEntregaTecnica', 'EDTACESSARENTREGATECNICA'));
+        const ret = (await sqlScalar(`exec SmartBox.USP_AcessarEntregaTecnica 0${codObra}, 0${session.codigo}, 0${tipoAcesso}`)).trim();
+
+        if (!ret) return messageResult('Solicitação executada.');
+        if (/^https?:\/\//i.test(ret)) {
+          return { ok: true, data: { script: `abrirEntregaTecnica(${JSON.stringify(ret)});` } };
+        }
+
+        return scriptOrHtmlResult(ret, 'corpoModalMensagem');
       }
       if (action === 'estruturaEntregaTecnica') {
-        await callSql(`exec WhatsApp.USP_EntregaTecnicaEstrutura 0${obra(form)}, 0${session.codigo}`);
-        return messageResult('Estrutura de entrega técnica solicitada.');
+        if (codObra === '0') throw new Error('Selecione um equipamento antes de gerar a estrutura.');
+        await callSql(`exec WhatsApp.USP_EntregaTecnicaEstrutura 0${codObra}, 0${session.codigo}`);
+        return messageResult('Estrutura de entrega técnica solicitada. Verifique o WhatsApp.');
       }
       break;
     }
